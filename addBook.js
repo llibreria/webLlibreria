@@ -1,12 +1,12 @@
 // addBook.js
 // Lógica para añadir libros manualmente usando ISBN y Google Books
 
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@1.35.1/dist/module/index.js';
 import { fetchGoogleBooks } from './search.js';
 import { showAlert, showError } from './ui.js';
 
 const SUPABASE_URL = 'https://vrbheaswtkheyxswnhrp.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'; // usar variables de entorno en producción
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZyYmhlYXN3dGtoZXl4c3duaHJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ4MjkzMDcsImV4cCI6MjA2MDQwNTMwN30.3lrx_kJwp7uHbhu9IgKGTM5Somobi4tjTiYdCtEYW1o'; // usar variables de entorno en producción
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 /**

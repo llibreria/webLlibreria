@@ -1,6 +1,10 @@
 // main.js
 // Punto de entrada de la aplicación: inicializa módulos, carga datos y liga eventos
 
+// ─── main.js ───
+console.log('[Main] main.js cargado');
+console.log('[Main] window.supabase disponible en main:', !!window.supabase);
+
 import {
   fetchLibros,
   fetchPrestamosActivos,
@@ -8,6 +12,7 @@ import {
   createLoan,
   markLoanReturned
 } from './api.js';
+
 import {
   renderLibros
 } from './ui.js';

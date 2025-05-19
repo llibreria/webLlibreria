@@ -1,12 +1,23 @@
 // search.js
 // Lógica de búsqueda de libros (local y en Google Books)
-
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@1.35.1/+esm';
 import { renderCoincidencias, renderGoogleResults, showAlert, showError } from './ui.js';
 
+/** Puntos de diagnóstico para import de Supabase UMD */
+console.log('[API] api.js cargado');
+console.log('[API] window.supabase disponible:', !!window.supabase);
+
 const SUPABASE_URL = 'https://vrbheaswtkheyxswnhrp.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZyYmhlYXN3dGtoZXl4c3duaHJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ4MjkzMDcsImV4cCI6MjA2MDQwNTMwN30.3lrx_kJwp7uHbhu9IgKGTM5Somobi4tjTiYdCtEYW1o'; // considera usar variables de entorno
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZyYmhlYXN3dGtoZXl4c3duaHJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ4MjkzMDcsImV4cCI6MjA2MDQwNTMwN30.3lrx_kJwp7uHbhu9IgKGTM5Somobi4tjTiYdCtEYW1o'; // sigue recomendando .env en producción
+
+// Inicializar cliente desde UMD global
+let supabase;
+try {
+  if (!window.supabase) throw new Error('window.supabase no está definido');
+  supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  console.log('[API] Cliente Supabase inicializado correctamente');
+} catch (err) {
+  console.error('[API] Error al inicializar Supabase client:', err);
+}
 
 /**
  * Obtiene datos de Google Books para una consulta.

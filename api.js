@@ -66,28 +66,6 @@ export async function fetchPrestamosActivos(libroIds) {
 }
 
 /**
- * Obtiene detalle de un préstamo activo único.
- */
-export async function fetchPrestamoDetalle(libroId) {
-  console.log('[api] fetchPrestamoDetalle: libroId=', libroId);
-  try {
-    const { data, error } = await supabase
-      .from('prestamos')
-      .select('id, libro_id, quien, cuando, devuelto')
-      .eq('libro_id', libroId)
-      .eq('devuelto', false)
-      .single();
-
-    if (error) throw error;
-    console.log('[api] fetchPrestamoDetalle: OK');
-    return data;
-  } catch (err) {
-    console.error('[api] fetchPrestamoDetalle: ERROR ->', err.message);
-    throw err;
-  }
-}
-
-/**
  * Marca un préstamo como devuelto.
  */
 export async function updatePrestamoDevuelto(prestamoId) {

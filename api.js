@@ -213,3 +213,61 @@ export async function fetchGoogleBooks(query) {
     throw err;
   }
 }
+
+/**
+ * Obtiene el detalle del préstamo activo para un libro dado.
+ * @param {number|string} libroId
+ * @returns {Promise<Object>} datos del préstamo: { id, quien, cuando }
+ */
+export async function fetchPrestamoDetalle(libroId) {
+  console.log('[API] fetchPrestamoDetalle -> libroId:', libroId);
+  try {
+    const { data, error } = await supabase
+      .from('prestamos')
+      .select('id, quien, cuando')
+      .eq('libro_id', libroId)
+      .eq('devuelto', false)
+      .single();
+    if (error) throw error;
+    return data;
+  } catch (err) {
+    console.error('[API] fetchPrestamoDetalle -> error', err);
+    throw err;
+  }
+}
+
+/**
+ * Inserta un nuevo préstamo para un libro.
+ * @param {{ libroId: number|string, quien: string }} param0
+ */
+export async function createLoan({ libroId, quien }) {
+  console.log('[API] createLoan ->', { libroId, quien });
+  try {
+    const { error } = await supabase
+      .from('prestamos')
+      .insert([{ libro_id: libroId, quien, devuelto: false }]);
+    if (error) throw error;
+  } catch (err) {
+    console.error('[API] createLoan -> error', err);
+    throw err;
+  }
+}
+
+/**
+ * Marca un préstamo como devuelto.
+ * @param {number|string} prestamoId
+ */
+export async function markLoanReturned(prestamoId) {
+  console.log('[API] markLoanReturned -> prestamoId:', prestamoId);
+  try {
+    const { error } = await supabase
+      .from('prestamos')
+      .update({ devuelto: true })
+      .eq('id', prestamoId);
+    if (error) throw error;
+  } catch (err) {
+    console.error('[API] markLoanReturned -> error', err);
+    throw err;
+  }
+}
+

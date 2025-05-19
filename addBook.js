@@ -103,9 +103,10 @@ async function handleAddBook(event) {
   }
 
   try {
-    // 1) Obtener datos de Google Books
-    console.log('[AddBook] fetchGoogleBooks ->', isbn);
-    const items = await fetchGoogleBooks(isbn);
+    // 1) Obtener datos de Google Books (búsqueda estricta por ISBN)
+    console.log('[AddBook] fetchGoogleBooks -> isbn:' + isbn);
+    const items = await fetchGoogleBooks(`isbn:${isbn}`);
+
     if (!items.length) {
       showAlert('No se encontró libro con ese ISBN.');
       return;

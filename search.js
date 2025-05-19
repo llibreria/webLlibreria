@@ -24,7 +24,7 @@ try {
  * @param {string} query - Término de búsqueda
  * @returns {Promise<Array>} Lista de items de Google Books
  */
-async function fetchGoogleBooks(query) {
+export async function fetchGoogleBooks(query) {
   console.log('[Search] fetchGoogleBooks ->', query);
   try {
     const url = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}`;

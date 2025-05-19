@@ -1,7 +1,7 @@
 // search.js
 // Lógica de búsqueda de libros (local y en Google Books)
 
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@1.35.1/dist/module/index.js';
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@1.35.1/+esm';
 import { renderCoincidencias, renderGoogleResults, showAlert, showError } from './ui.js';
 
 const SUPABASE_URL = 'https://vrbheaswtkheyxswnhrp.supabase.co';

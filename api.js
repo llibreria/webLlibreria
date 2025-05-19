@@ -1,4 +1,4 @@
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@1.35.1/dist/module/index.js';
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@1.35.1/+esm';
 
 // Configuración de Supabase (mover a .env en producción)
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://vrbheaswtkheyxswnhrp.supabase.co';

@@ -1,7 +1,7 @@
 // addBook.js
 // Lógica para añadir libros manualmente usando ISBN y Google Books
 
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@1.35.1/dist/module/index.js';
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@1.35.1/+esm';
 import { fetchGoogleBooks } from './search.js';
 import { showAlert, showError } from './ui.js';
 

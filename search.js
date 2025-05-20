@@ -32,30 +32,32 @@ export async function fetchGoogleBooks(query) {
 /**
  * Carga todos los libros ordenados por ID descendente.
  */
+let _loadedAll = false;
+
 export async function loadAllBooks() {
   console.log('[Search] loadAllBooks -> iniciando');
+  if (_loadedAll) {
+    console.log('[Search] loadAllBooks -> ya cargado, salto segunda ejecución');
+    return;
+  }
+  _loadedAll = true;
+
   try {
-    // 1) Traer libros con sólo los IDs de las relaciones
-    const { data: librosRaw, error: librosErr } = await supabase
+    // Consulta anidada que recupera autor, estantería y saga en un solo paso
+    const { data: libros, error } = await supabase
       .from('libros')
-      .select('id, titol, autor_id, estanteria_id, saga_id')
+      .select(`
+        id,
+        titol,
+        autor:autor_id (nombre),
+        estanteria:estanteria_id (nombre),
+        saga:saga_id (nombre)
+      `)
       .order('id', { ascending: false });
-    if (librosErr) throw librosErr;
+    if (error) throw error;
 
-    // 2) Traer datos de autores, estanterías y sagas
-    const [
-      { data: autores, error: autorErr },
-      { data: estanterias, error: estErr },
-      { data: sagas, error: sagaErr }
-    ] = await Promise.all([
-      supabase.from('autores').select('id, nombre'),
-      supabase.from('estanterias').select('id, nombre'),
-      supabase.from('sagas').select('id, nombre')
-    ]);
-    if (autorErr || estErr || sagaErr) throw autorErr || estErr || sagaErr;
-
-    // 3) Traer préstamos activos
-    const libroIds = librosRaw.map(l => l.id);
+    // Obtener sólo los IDs de los préstamos activos
+    const libroIds = libros.map(l => l.id);
     const { data: prestamos, error: prestErr } = await supabase
       .from('prestamos')
       .select('libro_id')
@@ -63,13 +65,13 @@ export async function loadAllBooks() {
       .eq('devuelto', false);
     if (prestErr) throw prestErr;
 
-    // 4) Normalizar y combinar todo
-    const librosFormateados = librosRaw.map(l => ({
+    // Formatear y renderizar
+    const librosFormateados = libros.map(l => ({
       id: l.id,
       titol: l.titol,
-      autor: autores.find(a => a.id === l.autor_id)?.nombre || 'N/A',
-      estanteria: estanterias.find(e => e.id === l.estanteria_id)?.nombre || 'N/A',
-      saga: sagas.find(s => s.id === l.saga_id)?.nombre || null,
+      autor: l.autor?.nombre || 'N/A',
+      estanteria: l.estanteria?.nombre || 'N/A',
+      saga: l.saga?.nombre || null,
       prestado: prestamos.some(p => p.libro_id === l.id),
       leido: false
     }));
@@ -81,6 +83,7 @@ export async function loadAllBooks() {
     showError('Error al cargar la lista de libros.');
   }
 }
+
 
 
 /**

@@ -71,14 +71,6 @@ export function searchBooks() {
   console.log('[Search] searchBooks → iniciando');
   const q = document.getElementById('isbnInput')?.value.trim().toLowerCase() || '';
 
-  // limpiar resultados anteriores y lista principal
-  ['isbnResults', 'titleResults', 'authorResults'].forEach(id => {
-    const cont = document.getElementById(id);
-    if (cont) cont.innerHTML = '';
-  });
-  const listaPrincipal = document.getElementById('libros-lista');
-  if (listaPrincipal) listaPrincipal.innerHTML = '';
-
   if (!q) {
     console.log('[Search] searchBooks → query vacía, recargando todo');
     loadAllBooks();

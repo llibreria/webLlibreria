@@ -1,28 +1,16 @@
 // search.js
 // Lógica de búsqueda de libros (local y en Google Books)
-import { renderCoincidencias, renderGoogleResults, showAlert, showError } from './ui.js';
 
-/** Puntos de diagnóstico para import de Supabase UMD */
-console.log('[API] api.js cargado');
-console.log('[API] window.supabase disponible:', !!window.supabase);
+import { renderCoincidencias, renderGoogleResults, showError } from './ui.js';
+
+console.log('[Search] search.js cargado');
 
 const SUPABASE_URL = 'https://vrbheaswtkheyxswnhrp.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZyYmhlYXN3dGtoZXl4c3duaHJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ4MjkzMDcsImV4cCI6MjA2MDQwNTMwN30.3lrx_kJwp7uHbhu9IgKGTM5Somobi4tjTiYdCtEYW1o'; // sigue recomendando .env en producción
-
-// Inicializar cliente desde UMD global
-let supabase;
-try {
-  if (!window.supabase) throw new Error('window.supabase no está definido');
-  supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-  console.log('[API] Cliente Supabase inicializado correctamente');
-} catch (err) {
-  console.error('[API] Error al inicializar Supabase client:', err);
-}
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZyYmhlYXN3dGtoZXl4c3duaHJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ4MjkzMDcsImV4cCI6MjA2MDQwNTMwN30.3lrx_kJwp7uHbhu9IgKGTM5Somobi4tjTiYdCtEYW1o';
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 /**
- * Obtiene datos de Google Books para una consulta.
- * @param {string} query - Término de búsqueda
- * @returns {Promise<Array>} Lista de items de Google Books
+ * Búsqueda en Google Books.
  */
 export async function fetchGoogleBooks(query) {
   console.log('[Search] fetchGoogleBooks ->', query);
@@ -40,45 +28,28 @@ export async function fetchGoogleBooks(query) {
 }
 
 /**
- * Ejecuta la búsqueda de libros: local y externa.
+ * Ejecuta la búsqueda de libros: limpia lista principal y muestra resultados.
  */
 export async function searchBooks() {
   console.log('[Search] searchBooks -> iniciando');
-  // 0) Limpiar lista principal antes de buscar
+
+  // 0) Limpiar lista principal
   const lista = document.getElementById('libros-lista');
   if (lista) lista.textContent = '';
+
+  const inputEl = document.getElementById('isbnInput');
+  if (!inputEl) return showError('Campo de búsqueda no encontrado');
+  const query = inputEl.value.trim().toLowerCase();
+
+  // 1) Si está vacío, recargar lista original
+  if (!query) {
+    console.log('[Search] searchBooks -> campo vacío, recargando lista');
+    if (window.initApp) window.initApp();
+    return;
+  }
+
   try {
-    const inputEl = document.getElementById('isbnInput');
-    if (!inputEl) throw new Error('Campo de búsqueda no encontrado');
-    const query = inputEl.value.trim().toLowerCase();
-    
-    // Si no hay query, restaurar lista original
-    if (!query) {
-      console.log('[Search] searchBooks -> campo vacío, recargando lista original');
-      // vuelve a cargar todos los libros
-      if (window.initApp) {
-        window.initApp();
-      }
-      return;
-     }
-    }
-    
-    // Contenedores de resultados
-    const containers = {
-      isbn: 'isbnResults',
-      title: 'titleResults',
-      author: 'authorResults',
-      googleISBN: 'googleISBNResults',
-      googleOther: 'googleOtherResults'
-    };
-
-    // Limpiar contenedores locales
-    Object.values(containers).forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.textContent = '';
-    });
-
-    // 1) Buscar en Supabase
+    // 2) Búsqueda local en Supabase
     console.log('[Search] query local:', query);
     const [{ data: libros, error: librosErr }, { data: autores, error: autoresErr }] = await Promise.all([
       supabase.from('libros').select('id, titol, autor_id, isbn'),
@@ -87,41 +58,31 @@ export async function searchBooks() {
     if (librosErr) throw librosErr;
     if (autoresErr) throw autoresErr;
 
-    // Mapear autor a cada libro
     const librosConAutor = libros.map(libro => ({
       ...libro,
       autor: autores.find(a => a.id === libro.autor_id)?.nombre?.toLowerCase() || 'desconocido'
     }));
 
-    // Coincidencias locales
-    const exactISBN = librosConAutor.find(l => l.isbn === query);
-    if (exactISBN) {
-      showAlert('Ya tienes este libro en tu colección.');
-      renderCoincidencias(containers.isbn, [exactISBN], '');
-      return;
-    }
-
+    // 3) Filtrar coincidencias locales
     const matchesByISBN = librosConAutor.filter(l => l.isbn?.includes(query));
     const matchesByTitle = librosConAutor.filter(l => l.titol.toLowerCase().includes(query));
     const matchesByAuthor = librosConAutor.filter(l => l.autor.includes(query));
 
-    renderCoincidencias(containers.isbn, matchesByISBN, 'No hay coincidencias por ISBN.');
-    renderCoincidencias(containers.title, matchesByTitle, 'No hay coincidencias por título.');
-    renderCoincidencias(containers.author, matchesByAuthor, 'No hay coincidencias por autor.');
+    renderCoincidencias('isbnResults', matchesByISBN, 'No hay coincidencias por ISBN.');
+    renderCoincidencias('titleResults', matchesByTitle, 'No hay coincidencias por título.');
+    renderCoincidencias('authorResults', matchesByAuthor, 'No hay coincidencias por autor.');
 
-    // 2) Búsqueda externa si es ISBN
+    // 4) Búsqueda externa
     const isISBN = /^\d{10,13}$/.test(query);
     if (isISBN && matchesByISBN.length === 0) {
       console.log('[Search] ISBN válido, buscando en Google Books...');
       const items = await fetchGoogleBooks(`isbn:${query}`);
-      renderGoogleResults(items, containers.googleISBN);
+      renderGoogleResults(items, 'googleISBNResults');
     }
-
-    // 3) Búsqueda externa general si no es ISBN
     if (!isISBN) {
       console.log('[Search] búsqueda externa general:', query);
       const items = await fetchGoogleBooks(query);
-      renderGoogleResults(items, containers.googleOther);
+      renderGoogleResults(items, 'googleOtherResults');
     }
 
     console.log('[Search] searchBooks -> finalizado');
@@ -131,22 +92,5 @@ export async function searchBooks() {
   }
 }
 
-/** 
- * Inicializa el listener del formulario de búsqueda.
- */
-export function initSearch() {
-  console.log('[Search] initSearch -> binding form');
-  const form = document.getElementById('searchForm');
-  if (!form) {
-    console.warn('[Search] initSearch -> formulario no encontrado');
-    return;
-  }
-  form.addEventListener('submit', e => {
-    e.preventDefault();
-    searchBooks();
-  });
-}
-
-// Para que <button onclick="searchBooks()"> funcione:
+// Exponer globalmente para el onclick inline
 window.searchBooks = searchBooks;
-

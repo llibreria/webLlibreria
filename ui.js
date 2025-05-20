@@ -184,11 +184,3 @@ export function displayGoogleResults(items, containerId) {
     container.appendChild(el);
   });
 }
-
-
-export {
-  renderLibros,
-  renderCoincidencias,
-  displayGoogleResults,
-  showAlert
-};

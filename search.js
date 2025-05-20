@@ -34,47 +34,60 @@ export async function fetchGoogleBooks(query) {
  */
 let _loadedAll = false;
 
+/**
+ * Carga y muestra todos los libros ordenados por ID descendente,
+ * uniendo manualmente autor, estantería y saga.
+ */
 export async function loadAllBooks() {
-  console.log('[Search] loadAllBooks -> iniciando');
-  if (_loadedAll) {
-    console.log('[Search] loadAllBooks -> ya cargado, salto segunda ejecución');
-    return;
-  }
-  _loadedAll = true;
-
+  console.log('[Search] loadAllBooks -> iniciando carga manual');
   try {
-    // Consulta anidada que recupera autor, estantería y saga en un solo paso
-    const { data: libros, error } = await supabase
+    // 1) Traer todos los libros (con IDs de relaciones)
+    const { data: librosRaw, error: librosErr } = await supabase
       .from('libros')
-      .select(`
-        id,
-        titol,
-        autor:autor_id (nombre),
-        estanteria:estanteria_id (nombre),
-        saga:saga_id (nombre)
-      `)
+      .select('id, titol, isbn, autor_id, estanteria_id, saga_id')
       .order('id', { ascending: false });
-    if (error) throw error;
+    if (librosErr) throw librosErr;
+    console.log('[Search] librosRaw:', librosRaw.length);
 
-    // Obtener sólo los IDs de los préstamos activos
-    const libroIds = libros.map(l => l.id);
+    // 2) Traer tablas relacionadas
+    const [
+      { data: autores, error: autorErr },
+      { data: estanterias, error: estErr },
+      { data: sagas, error: sagaErr }
+    ] = await Promise.all([
+      supabase.from('autores').select('id, nombre'),
+      supabase.from('estanterias').select('id, nombre'),
+      supabase.from('sagas').select('id, nombre')
+    ]);
+    if (autorErr || estErr || sagaErr) throw autorErr || estErr || sagaErr;
+    console.log('[Search] autores, estanterias, sagas cargados');
+
+    // 3) Préstamos activos
+    const ids = librosRaw.map(l => l.id);
     const { data: prestamos, error: prestErr } = await supabase
       .from('prestamos')
       .select('libro_id')
-      .in('libro_id', libroIds)
+      .in('libro_id', ids)
       .eq('devuelto', false);
     if (prestErr) throw prestErr;
+    console.log('[Search] prestamos activos:', prestamos.length);
 
-    // Formatear y renderizar
-    const librosFormateados = libros.map(l => ({
-      id: l.id,
-      titol: l.titol,
-      autor: l.autor?.nombre || 'N/A',
-      estanteria: l.estanteria?.nombre || 'N/A',
-      saga: l.saga?.nombre || null,
-      prestado: prestamos.some(p => p.libro_id === l.id),
-      leido: false
-    }));
+    // 4) Mapear y renderizar
+    const librosFormateados = librosRaw.map(l => {
+      const autorObj = autores.find(a => a.id === l.autor_id);
+      const estObj   = estanterias.find(e => e.id === l.estanteria_id);
+      const sagaObj  = sagas.find(s => s.id === l.saga_id);
+      return {
+        id:         l.id,
+        titol:      l.titol,
+        isbn:       l.isbn,
+        autor:      autorObj   ? autorObj.nombre   : 'N/A',
+        estanteria: estObj     ? estObj.nombre     : 'N/A',
+        saga:       sagaObj    ? sagaObj.nombre    : null,
+        prestado:   prestamos.some(p => p.libro_id === l.id),
+        leido:      false
+      };
+    });
 
     renderLibros(librosFormateados);
     console.log('[Search] loadAllBooks -> renderizados:', librosFormateados.length);
@@ -83,8 +96,6 @@ export async function loadAllBooks() {
     showError('Error al cargar la lista de libros.');
   }
 }
-
-
 
 /**
  * Filtra la lista mostrada según query (ISBN, título o autor).

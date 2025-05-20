@@ -1,113 +1,119 @@
-// main.js
-// Punto de entrada de la aplicación: inicializa módulos, carga datos y liga eventos
+// search.js
+// Lógica de búsqueda de libros (carga inicial y filtrado por ISBN, título o autor)
 
-console.log('[Main] main.js cargado');
-console.log('[Main] window.supabase disponible en main:', !!window.supabase);
+import { renderLibros, renderCoincidencias, showError } from './ui.js';
 
-import {
-  fetchLibros,
-  fetchPrestamosActivos,
-  fetchPrestamoDetalle,
-  createLoan,
-  markLoanReturned
-} from './api.js';
-import {
-  renderLibros
-} from './ui.js';
-import {
-  initModals,
-  openLoanModal,
-  openCreateLoanModal,
-  openAddBookModal,
-  getCurrentLoanId
-} from './modals.js';
-import { initAddBook } from './addBook.js';
-import { showError } from './ui.js';
+console.log('[Search] search.js cargado');
+
+const supabase = window.supabase.createClient(
+  'https://vrbheaswtkheyxswnhrp.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZyYmhlYXN3dGtoZXl4c3duaHJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ4MjkzMDcsImV4cCI6MjA2MDQwNTMwN30.3lrx_kJwp7uHbhu9IgKGTM5Somobi4tjTiYdCtEYW1o'
+);
 
 /**
- * Inicializa la aplicación: carga libros y préstamos, renderiza UI y configura listeners.
+ * Carga y muestra todos los libros ordenados por ID descendente.
  */
-async function initApp() {
-  console.log('[Main] initApp -> Iniciando');
+export async function loadAllBooks() {
+  console.log('[Search] loadAllBooks -> iniciando');
   try {
-    // 1) Cargar libros
-    const libros = await fetchLibros();
+    const { data: libros, error } = await supabase
+      .from('libros')
+      .select(`
+        id,
+        titol,
+        autor:autor_id (id, nombre),
+        estanteria:estanteria_id (id, nombre),
+        saga:saga_id (id, nombre)
+      `)
+      .order('id', { ascending: false });
 
-    // 2) Cargar préstamos activos
-    const ids = libros.map(l => l.id);
-    const prestamos = await fetchPrestamosActivos(ids);
+    if (error) throw error;
 
-    // 3) Combinar datos
-    const librosConEstado = libros.map(libro => ({
-      ...libro,
-      prestado: prestamos.some(p => p.libro_id === libro.id),
-      leido: false
-    }));
+    // Obtener préstamos activos
+    const libroIds = libros.map(l => l.id);
+    const { data: prestamos, error: prestErr } = await supabase
+      .from('prestamos')
+      .select('libro_id, devuelto')
+      .in('libro_id', libroIds)
+      .eq('devuelto', false);
 
-    // 4) Renderizar lista
-    renderLibros(librosConEstado);
+    if (prestErr) throw prestErr;
 
-    // 5) Inicializar modales y alta de libros
-    initModals();
-    initAddBook();
-
-    // 6) Escuchar clicks en íconos de préstamo
-    document.addEventListener('onLoanClick', async (e) => {
-      const { libroId } = e.detail;
-      console.log('[Main] onLoanClick -> libroId', libroId);
-      try {
-        const data = await fetchPrestamoDetalle(libroId);
-        openLoanModal(data);
-      } catch (err) {
-        showError('No se pudo cargar el préstamo: ' + err.message);
-      }
+    // Formatear libros
+    const librosFormateados = libros.map(libro => {
+      const prestado = prestamos.some(p => p.libro_id === libro.id);
+      return {
+        ...libro,
+        autor: libro.autor?.nombre || 'N/A',
+        estanteria: libro.estanteria?.nombre || 'N/A',
+        saga: libro.saga?.nombre || null,
+        leido: false,
+        prestado
+      };
     });
 
-    // 7) Crear nuevo préstamo desde modal
-    const submitLoanBtn = document.getElementById('submitLoan');
-    submitLoanBtn?.addEventListener('click', async () => {
-      const createModal = document.getElementById('createLoanModal');
-      const quienInput = document.getElementById('inputQuien');
-      const libroId = createModal?.dataset.libroId;
-      const quien = quienInput?.value.trim();
-      if (!libroId || !quien) return showError('Datos de préstamo incompletos');
-
-      try {
-        await createLoan({ libroId, quien });
-        alert('Préstamo registrado');
-        createModal.style.display = 'none';
-        await initApp(); // refrescar listas
-      } catch (err) {
-        showError('Error registrando préstamo: ' + err.message);
-      }
-    });
-
-    // 8) Marcar préstamo como devuelto desde modal
-    const returnLoanBtn = document.getElementById('markAsReturned');
-    returnLoanBtn?.addEventListener('click', async () => {
-      const prestamoId = getCurrentLoanId();
-      if (!prestamoId) return showError('No hay préstamo seleccionado');
-
-      try {
-        await markLoanReturned(prestamoId);
-        alert('Libro marcado como devuelto');
-        const loanModal = document.getElementById('loanModal');
-        loanModal.style.display = 'none';
-        await initApp(); // refrescar listas
-      } catch (err) {
-        showError('Error actualizando préstamo: ' + err.message);
-      }
-    });
-
-    console.log('[Main] initApp -> Listo');
+    renderLibros(librosFormateados);
+    console.log('[Search] loadAllBooks -> libros renderizados:', librosFormateados.length);
   } catch (err) {
-    console.error('[Main] initApp -> Error', err);
-    showError('Error al iniciar la aplicación: ' + err.message);
+    console.error('[Search] loadAllBooks -> error:', err);
+    showError('Error al cargar libros.');
   }
 }
 
-// Exponer initApp para recarga desde search.js
-window.initApp = initApp;
+/**
+ * Realiza la búsqueda en local y muestra coincidencias en las secciones.
+ */
+export async function performSearch() {
+  console.log('[Search] performSearch -> ejecutando');
+  const input = document.getElementById('isbnInput');
+  const query = input?.value.trim().toLowerCase();
 
-// Esperar a que el DOM esté listo
-window.addEventListener('DOMContentLoaded', initApp);
+  if (!query) {
+    console.log('[Search] vacío -> recargando');
+    loadAllBooks();
+    return;
+  }
+
+  try {
+    const [{ data: libros }, { data: autores }] = await Promise.all([
+      supabase.from('libros').select('id, titol, autor_id, isbn'),
+      supabase.from('autores').select('id, nombre')
+    ]);
+
+    const librosConAutor = libros.map(libro => ({
+      ...libro,
+      autor: autores.find(a => a.id === libro.autor_id)?.nombre?.toLowerCase() || 'desconocido'
+    }));
+
+    const matchesByISBN = librosConAutor.filter(l => l.isbn?.includes(query));
+    const matchesByTitle = librosConAutor.filter(l => l.titol?.toLowerCase().includes(query));
+    const matchesByAuthor = librosConAutor.filter(l => l.autor?.includes(query));
+
+    renderCoincidencias('isbnResults', matchesByISBN, 'No hay coincidencias por ISBN.');
+    renderCoincidencias('titleResults', matchesByTitle, 'No hay coincidencias por título.');
+    renderCoincidencias('authorResults', matchesByAuthor, 'No hay coincidencias por autor.');
+
+    console.log('[Search] performSearch -> terminado');
+  } catch (err) {
+    console.error('[Search] performSearch -> error', err);
+    showError('Error al buscar libros.');
+  }
+}
+
+/**
+ * Asocia el botón de búsqueda al evento click.
+ */
+export function initSearch() {
+  console.log('[Search] initSearch -> binding botón');
+  const btn = document.getElementById('searchBtn');
+  if (!btn) {
+    console.warn('[Search] initSearch -> botón no encontrado');
+    return;
+  }
+  btn.addEventListener('click', performSearch);
+}
+
+// Exponer globalmente por si se invoca desde HTML
+window.loadAllBooks = loadAllBooks;
+window.performSearch = performSearch;
+window.initSearch = initSearch;

@@ -23,7 +23,7 @@ import {
   openAddBookModal,
   getCurrentLoanId
 } from './modals.js';
-import { initSearch } from './search.js';
+import { loadAllBooks, initSearch } from './search.js';
 import { initAddBook } from './addBook.js';
 import { showError } from './ui.js';
 
@@ -114,3 +114,8 @@ async function initApp() {
 window.addEventListener('DOMContentLoaded', initApp);
 // Para poder recargar la lista de libros desde search.js
 window.initApp = initApp;
+
+window.addEventListener('DOMContentLoaded', () => {
+  loadAllBooks();
+  initSearch();
+});

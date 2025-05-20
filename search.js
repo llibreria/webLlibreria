@@ -6,7 +6,7 @@ import { renderCoincidencias, renderGoogleResults, showError } from './ui.js';
 console.log('[Search] search.js cargado');
 
 const SUPABASE_URL = 'https://vrbheaswtkheyxswnhrp.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZyYmhlYXN3dGtoZXl4c3duaHJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ4MjkzMDcsImV4cCI6MjA2MDQwNTMwN30.3lrx_kJwp7uHbhu9IgKGTM5Somobi4tjTiYdCtEYW1o';
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 /**

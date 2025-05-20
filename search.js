@@ -1,103 +1,113 @@
-// search.js
-// Lógica de búsqueda de libros (local y en Google Books)
+// main.js
+// Punto de entrada de la aplicación: inicializa módulos, carga datos y liga eventos
 
-import { renderCoincidencias, renderGoogleResults, showError } from './ui.js';
+console.log('[Main] main.js cargado');
+console.log('[Main] window.supabase disponible en main:', !!window.supabase);
 
-console.log('[Search] search.js cargado');
-
-const SUPABASE_URL = 'https://vrbheaswtkheyxswnhrp.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZyYmhlYXN3dGtoZXl4c3duaHJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ4MjkzMDcsImV4cCI6MjA2MDQwNTMwN30.3lrx_kJwp7uHbhu9IgKGTM5Somobi4tjTiYdCtEYW1o';
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-/**
- * Búsqueda en Google Books.
- * @param {string} query
- * @returns {Promise<Array>}
- */
-export async function fetchGoogleBooks(query) {
-  console.log('[Search] fetchGoogleBooks ->', query);
-  try {
-    const url = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}`;
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`Google Books API: ${res.status}`);
-    const data = await res.json();
-    return data.items || [];
-  } catch (err) {
-    console.error('[Search] fetchGoogleBooks -> error', err);
-    showError('No se pudieron obtener resultados de Google Books.');
-    return [];
-  }
-}
+import {
+  fetchLibros,
+  fetchPrestamosActivos,
+  fetchPrestamoDetalle,
+  createLoan,
+  markLoanReturned
+} from './api.js';
+import {
+  renderLibros
+} from './ui.js';
+import {
+  initModals,
+  openLoanModal,
+  openCreateLoanModal,
+  openAddBookModal,
+  getCurrentLoanId
+} from './modals.js';
+import { initAddBook } from './addBook.js';
+import { showError } from './ui.js';
 
 /**
- * Ejecuta la búsqueda de libros: limpia lista principal y muestra resultados.
+ * Inicializa la aplicación: carga libros y préstamos, renderiza UI y configura listeners.
  */
-export async function searchBooks() {
-  console.log('[Search] searchBooks -> iniciando');
-
-  // 0) Limpiar lista principal
-  const lista = document.getElementById('libros-lista');
-  if (lista) lista.textContent = '';
-
-  // 1) Leer y validar query
-  const inputEl = document.getElementById('isbnInput');
-  if (!inputEl) {
-    showError('Campo de búsqueda no encontrado');
-    return;
-  }
-  const query = inputEl.value.trim().toLowerCase();
-
-  // 2) Si vacía, recargar lista original
-  if (!query) {
-    console.log('[Search] searchBooks -> campo vacío, recargando lista');
-    if (window.initApp) window.initApp();
-    return;
-  }
-
+async function initApp() {
+  console.log('[Main] initApp -> Iniciando');
   try {
-    // 3) Búsqueda local en Supabase
-    console.log('[Search] query local:', query);
-    const [librosRes, autoresRes] = await Promise.all([
-      supabase.from('libros').select('id, titol, autor_id, isbn'),
-      supabase.from('autores').select('id, nombre')
-    ]);
-    const { data: libros, error: librosErr } = librosRes;
-    const { data: autores, error: autoresErr } = autoresRes;
-    if (librosErr) throw librosErr;
-    if (autoresErr) throw autoresErr;
+    // 1) Cargar libros
+    const libros = await fetchLibros();
 
-    const librosConAutor = libros.map(libro => ({
+    // 2) Cargar préstamos activos
+    const ids = libros.map(l => l.id);
+    const prestamos = await fetchPrestamosActivos(ids);
+
+    // 3) Combinar datos
+    const librosConEstado = libros.map(libro => ({
       ...libro,
-      autor: autores.find(a => a.id === libro.autor_id)?.nombre?.toLowerCase() || 'desconocido'
+      prestado: prestamos.some(p => p.libro_id === libro.id),
+      leido: false
     }));
 
-    // 4) Filtrar coincidencias locales
-    const matchesByISBN = librosConAutor.filter(l => l.isbn?.includes(query));
-    const matchesByTitle = librosConAutor.filter(l => l.titol.toLowerCase().includes(query));
-    const matchesByAuthor = librosConAutor.filter(l => l.autor.includes(query));
+    // 4) Renderizar lista
+    renderLibros(librosConEstado);
 
-    renderCoincidencias('isbnResults', matchesByISBN, 'No hay coincidencias por ISBN.');
-    renderCoincidencias('titleResults', matchesByTitle, 'No hay coincidencias por título.');
-    renderCoincidencias('authorResults', matchesByAuthor, 'No hay coincidencias por autor.');
+    // 5) Inicializar modales y alta de libros
+    initModals();
+    initAddBook();
 
-    // 5) Búsqueda externa en Google Books
-    const isISBN = /^\d{10,13}$/.test(query);
-    if (isISBN && matchesByISBN.length === 0) {
-      console.log('[Search] ISBN válido, buscando en Google Books...');
-      const items = await fetchGoogleBooks(`isbn:${query}`);
-      renderGoogleResults(items, 'googleISBNResults');
-    } else if (!isISBN) {
-      console.log('[Search] búsqueda externa general:', query);
-      const items = await fetchGoogleBooks(query);
-      renderGoogleResults(items, 'googleOtherResults');
-    }
+    // 6) Escuchar clicks en íconos de préstamo
+    document.addEventListener('onLoanClick', async (e) => {
+      const { libroId } = e.detail;
+      console.log('[Main] onLoanClick -> libroId', libroId);
+      try {
+        const data = await fetchPrestamoDetalle(libroId);
+        openLoanModal(data);
+      } catch (err) {
+        showError('No se pudo cargar el préstamo: ' + err.message);
+      }
+    });
 
-    console.log('[Search] searchBooks -> finalizado');
+    // 7) Crear nuevo préstamo desde modal
+    const submitLoanBtn = document.getElementById('submitLoan');
+    submitLoanBtn?.addEventListener('click', async () => {
+      const createModal = document.getElementById('createLoanModal');
+      const quienInput = document.getElementById('inputQuien');
+      const libroId = createModal?.dataset.libroId;
+      const quien = quienInput?.value.trim();
+      if (!libroId || !quien) return showError('Datos de préstamo incompletos');
+
+      try {
+        await createLoan({ libroId, quien });
+        alert('Préstamo registrado');
+        createModal.style.display = 'none';
+        await initApp(); // refrescar listas
+      } catch (err) {
+        showError('Error registrando préstamo: ' + err.message);
+      }
+    });
+
+    // 8) Marcar préstamo como devuelto desde modal
+    const returnLoanBtn = document.getElementById('markAsReturned');
+    returnLoanBtn?.addEventListener('click', async () => {
+      const prestamoId = getCurrentLoanId();
+      if (!prestamoId) return showError('No hay préstamo seleccionado');
+
+      try {
+        await markLoanReturned(prestamoId);
+        alert('Libro marcado como devuelto');
+        const loanModal = document.getElementById('loanModal');
+        loanModal.style.display = 'none';
+        await initApp(); // refrescar listas
+      } catch (err) {
+        showError('Error actualizando préstamo: ' + err.message);
+      }
+    });
+
+    console.log('[Main] initApp -> Listo');
   } catch (err) {
-    console.error('[Search] searchBooks -> error', err);
-    showError(err.message);
+    console.error('[Main] initApp -> Error', err);
+    showError('Error al iniciar la aplicación: ' + err.message);
   }
 }
 
-// Exponer globalmente para el onclick inline
-window.searchBooks = searchBooks;
+// Exponer initApp para recarga desde search.js
+window.initApp = initApp;
+
+// Esperar a que el DOM esté listo
+window.addEventListener('DOMContentLoaded', initApp);

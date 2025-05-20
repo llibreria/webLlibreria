@@ -157,3 +157,39 @@ export function showAlert(mensaje) {
   // Opcional: usar un componente de alerta en lugar de alert()
   alert(mensaje);
 }
+
+/**
+ * Muestra los resultados de Google Books en el contenedor indicado.
+ * @param {Array} items — array de ítems de Google Books
+ * @param {string} containerId — id del elemento donde renderizar
+ */
+export function displayGoogleResults(items, containerId) {
+  const container = document.getElementById(containerId);
+  if (!container) return console.warn(`[UI] displayGoogleResults: contenedor "${containerId}" no encontrado`);
+  container.innerHTML = '';
+
+  if (!items.length) {
+    container.innerHTML = 'No se encontraron resultados.';
+    return;
+  }
+
+  items.forEach(item => {
+    const info = item.volumeInfo || {};
+    const el = document.createElement('div');
+    el.classList.add('libro');
+    el.innerHTML = `
+      <strong>${info.title || 'Sin título'}</strong><br>
+      Autor(es): ${info.authors?.join(', ') || 'Desconocido'}<br><br>
+    `;
+    container.appendChild(el);
+  });
+}
+
+
+export {
+  renderLibros,
+  renderCoincidencias,
+  displayGoogleResults,
+  showAlert,
+  showError
+};

@@ -122,7 +122,7 @@ export async function searchBooks() {
   }
 }
 
-/**
+/** 
  * Inicializa el listener del formulario de búsqueda.
  */
 export function initSearch() {
@@ -137,3 +137,7 @@ export function initSearch() {
     searchBooks();
   });
 }
+
+// Para que <button onclick="searchBooks()"> funcione:
+window.searchBooks = searchBooks;
+

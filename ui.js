@@ -190,6 +190,5 @@ export {
   renderLibros,
   renderCoincidencias,
   displayGoogleResults,
-  showAlert,
-  showError
+  showAlert
 };

@@ -44,11 +44,25 @@ export async function fetchGoogleBooks(query) {
  */
 export async function searchBooks() {
   console.log('[Search] searchBooks -> iniciando');
+  // 0) Limpiar lista principal antes de buscar
+  const lista = document.getElementById('libros-lista');
+  if (lista) lista.textContent = '';
   try {
     const inputEl = document.getElementById('isbnInput');
     if (!inputEl) throw new Error('Campo de búsqueda no encontrado');
     const query = inputEl.value.trim().toLowerCase();
-
+    
+    // Si no hay query, restaurar lista original
+    if (!query) {
+      console.log('[Search] searchBooks -> campo vacío, recargando lista original');
+      // vuelve a cargar todos los libros
+      if (window.initApp) {
+        window.initApp();
+      }
+      return;
+     }
+    }
+    
     // Contenedores de resultados
     const containers = {
       isbn: 'isbnResults',
@@ -63,11 +77,6 @@ export async function searchBooks() {
       const el = document.getElementById(id);
       if (el) el.textContent = '';
     });
-
-    if (!query) {
-      showAlert('Ingresa un término de búsqueda.');
-      return;
-    }
 
     // 1) Buscar en Supabase
     console.log('[Search] query local:', query);

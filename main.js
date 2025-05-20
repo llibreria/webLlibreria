@@ -112,3 +112,5 @@ async function initApp() {
 
 // Esperar a que el DOM esté listo
 window.addEventListener('DOMContentLoaded', initApp);
+// Para poder recargar la lista de libros desde search.js
+window.initApp = initApp;

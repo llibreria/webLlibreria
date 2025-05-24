@@ -4,14 +4,12 @@
 // Se asume que en index.html cargas el UMD de Supabase antes de este módulo:
 // <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/umd/supabase.min.js"></script>
 
-// Accedemos al cliente global de Supabase
-const { createClient } = supabase;
 import { renderCoincidencias, renderGoogleResults, showAlert, showError } from './ui.js';
 
-// Inicializa el cliente de Supabase
+// Inicializa el cliente de Supabase usando el objeto global expuesto por el UMD
 const SUPABASE_URL = 'https://vrbheaswtkheyxswnhrp.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZyYmhlYXN3dGtoZXl4c3duaHJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ4MjkzMDcsImV4cCI6MjA2MDQwNTMwN30.3lrx_kJwp7uHbhu9IgKGTM5Somobi4tjTiYdCtEYW1o';
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 /**
  * Función auxiliar para consultar Google Books por ISBN o texto libre

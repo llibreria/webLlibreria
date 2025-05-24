@@ -7,8 +7,8 @@
 import { renderCoincidencias, renderGoogleResults, showAlert, showError } from './ui.js';
 
 // Inicializa el cliente de Supabase usando el objeto global expuesto por el UMD
-const SUPABASE_URL = 'https://tusupabaseurl.supabase.co';
-const SUPABASE_KEY = 'tusupabaseanonkey';
+const SUPABASE_URL = 'https://vrbheaswtkheyxswnhrp.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZyYmhlYXN3dGtoZXl4c3duaHJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ4MjkzMDcsImV4cCI6MjA2MDQwNTMwN30.3lrx_kJwp7uHbhu9IgKGTM5Somobi4tjTiYdCtEYW1o';
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 /**

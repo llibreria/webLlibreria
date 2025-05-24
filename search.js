@@ -33,8 +33,7 @@ export async function searchBooks() {
     if (el) el.innerHTML = '';
   });
   if (!q) {
-    // Si no hay query, puedes recargar todos con otra función externa
-    return;
+    return; // no search
   }
 
   // Obtener libros básicos con autor
@@ -56,7 +55,8 @@ export async function searchBooks() {
   const exact = librosMap.filter(l => l.isbn?.toLowerCase() === q);
   if (exact.length) {
     alert('Ya tienes este libro en tu colección.');
-    return mostrarCoincidencias('isbnResults', exact, '');
+    mostrarCoincidencias('isbnResults', exact, '');
+    return;
   }
 
   // Búsquedas parciales
@@ -71,16 +71,16 @@ export async function searchBooks() {
   // Determinar si es ISBN válido
   const isISBN = /^\d{10,13}$/.test(qRaw);
   if (isISBN && byIsbn.length === 0) {
-    // Buscar en Google Books por ISBN
     const items = await fetchGoogleBooks(qRaw, true);
     if (!items.length) return alert('No se encontró ningún libro con ese ISBN.');
-    return displayGoogleResults(items, 'googleISBNResults');
+    displayGoogleResults(items, 'googleISBNResults');
+    return;
   }
 
-  // Búsqueda libre en Google Books si no es ISBN o no hubo coincidencias de autor/título
   if (!isISBN) {
     const items = await fetchGoogleBooks(qRaw, false);
-    return displayGoogleResults(items, 'googleOtherResults');
+    displayGoogleResults(items, 'googleOtherResults');
+    return;
   }
 }
 
@@ -111,5 +111,23 @@ export function displayGoogleResults(items, containerId) {
     : '<p>No hay resultados.</p>';
 }
 
-// Exponer función para el botón de búsqueda
+/**
+ * Inicializa el listener de búsqueda en el formulario
+ */
+export function initSearch() {
+  const form = document.getElementById('searchForm');
+  if (form) {
+    form.addEventListener('submit', async e => {
+      e.preventDefault();
+      await searchBooks();
+    });
+  } else {
+    console.warn('searchForm no encontrado en DOM');
+  }
+}
+
+// Exponer funciones globales
 window.searchBooks = searchBooks;
+
+// Llamar initSearch si se importa este módulo
+initSearch();

@@ -7,35 +7,18 @@
 import { renderCoincidencias, renderGoogleResults, showAlert, showError } from './ui.js';
 
 // Inicializa el cliente de Supabase usando el objeto global expuesto por el UMD
-const SUPABASE_URL = 'https://vrbheaswtkheyxswnhrp.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZyYmhlYXN3dGtoZXl4c3duaHJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ4MjkzMDcsImV4cCI6MjA2MDQwNTMwN30.3lrx_kJwp7uHbhu9IgKGTM5Somobi4tjTiYdCtEYW1o';
+const SUPABASE_URL = 'https://tusupabaseurl.supabase.co';
+const SUPABASE_KEY = 'tusupabaseanonkey';
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 /**
- * Función auxiliar para consultar Google Books por ISBN o texto libre
- * @param {string} query ISBN o texto de búsqueda
- * @param {boolean} isIsbn indicar si la búsqueda es por ISBN exacto
- * @returns {Promise<Array>} lista de items de Google Books
+ * Carga todos los libros ordenados por ID descendente, incluyendo nombre del autor
  */
-export async function fetchGoogleBooks(query, isIsbn = true) {
-  const prefix = isIsbn ? `isbn:${query}` : encodeURIComponent(query);
-  try {
-    const res = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${prefix}`);
-    const data = await res.json();
-    return data.items || [];
-  } catch (err) {
-    console.error('[search.js] fetchGoogleBooks error', err);
-    showError('Error al consultar Google Books');
-    return [];
-  }
-}
-
-// Carga todos los libros ordenados por ID descendente
 export async function loadAllBooks() {
   try {
     const { data: books, error } = await supabase
       .from('libros')
-      .select('id, isbn, title, author')
+      .select('id, isbn, titol, autor_id, autores(nombre)')
       .order('id', { ascending: false });
     if (error) throw error;
     clearResults();
@@ -45,7 +28,9 @@ export async function loadAllBooks() {
   }
 }
 
-// Muestra la lista completa de libros en el contenedor
+/**
+ * Muestra la lista completa de libros en el contenedor
+ */
 function displayAllBooks(books) {
   const lista = document.getElementById('libros-lista');
   lista.innerHTML = '';
@@ -54,18 +39,21 @@ function displayAllBooks(books) {
     return;
   }
   books.forEach(libro => {
+    const autorNombre = libro.autores?.[0]?.nombre || 'Desconocido';
     const item = document.createElement('div');
     item.classList.add('book-item');
     item.innerHTML = `
-      <strong>${libro.title}</strong><br>
-      ISBN: ${libro.isbn}<br>
-      Autor: ${libro.author}
+      <strong>${libro.titol}</strong><br>
+      ISBN: ${libro.isbn || 'N/A'}<br>
+      Autor: ${autorNombre}
     `;
     lista.appendChild(item);
   });
 }
 
-// Limpia todas las zonas de resultados anteriores
+/**
+ * Limpia todas las zonas de resultados anteriores
+ */
 function clearResults() {
   document.getElementById('isbn-results').innerHTML = '';
   document.getElementById('title-results').innerHTML = '';
@@ -73,7 +61,9 @@ function clearResults() {
   document.getElementById('libros-lista').innerHTML = '';
 }
 
-// Función principal de búsqueda
+/**
+ * Función principal de búsqueda
+ */
 export async function searchBooks() {
   const query = document.getElementById('isbnInput').value.trim();
   clearResults();
@@ -85,22 +75,23 @@ export async function searchBooks() {
   }
 
   try {
-    // Busqueda local por coincidencias exactas y parciales
+    // Búsqueda local por coincidencias exactas y parciales, incluyendo autor
     const { data: exactMatches } = await supabase
       .from('libros')
-      .select('*')
+      .select('id, isbn, titol, autor_id, autores(nombre)')
       .eq('isbn', query);
 
     const { data: partialMatches } = await supabase
       .from('libros')
-      .select('*')
+      .select('id, isbn, titol, autor_id, autores(nombre)')
       .or(
-        `isbn.ilike.%${query}%,title.ilike.%${query}%,author.ilike.%${query}%`
+        `isbn.ilike.%${query}%,titol.ilike.%${query}%,autores.nombre.ilike.%${query}%`
       );
 
     // Renderizamos coincidencias locales
     if (exactMatches.length) renderCoincidencias(exactMatches, 'isbn-results');
     if (partialMatches.length) renderCoincidencias(partialMatches, 'title-results');
+    if (partialMatches.length) renderCoincidencias(partialMatches, 'author-results');
 
     // Si no hay resultados locales y es ISBN válido, consulta Google Books
     const isbnRegex = /^(?:\d{10}|\d{13})$/;
@@ -118,7 +109,9 @@ export async function searchBooks() {
   }
 }
 
-// Inicializa el evento de búsqueda y carga inicial de libros
+/**
+ * Inicializa el evento de búsqueda y carga inicial de libros
+ */
 export function initSearch() {
   const form = document.getElementById('searchForm');
   form?.addEventListener('submit', async e => {
@@ -130,5 +123,5 @@ export function initSearch() {
   loadAllBooks();
 }
 
-// Al cargar el módulo, iniciar búsqueda
+// Iniciar búsqueda al cargar módulo
 initSearch();

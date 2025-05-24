@@ -1,10 +1,32 @@
-import { createClient } from '@supabase/supabase-js';
+// search.js
+// Lógica de búsqueda de libros usando Supabase y Google Books
+
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@1.35.1/dist/module/index.js';
 import { renderCoincidencias, renderGoogleResults, showAlert, showError } from './ui.js';
 
 // Inicializa el cliente de Supabase
-const supabaseUrl = 'https://vrbheaswtkheyxswnhrp.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZyYmhlYXN3dGtoZXl4c3duaHJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ4MjkzMDcsImV4cCI6MjA2MDQwNTMwN30.3lrx_kJwp7uHbhu9IgKGTM5Somobi4tjTiYdCtEYW1o';
-const supabase = createClient(supabaseUrl, supabaseKey);
+const SUPABASE_URL = 'https://tusupabaseurl.supabase.co';
+const SUPABASE_KEY = 'tusupabaseanonkey';
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+/**
+ * Función auxiliar para consultar Google Books por ISBN o texto libre
+ * @param {string} query ISBN o texto de búsqueda
+ * @param {boolean} isIsbn indicar si la búsqueda es por ISBN exacto
+ * @returns {Promise<Array>} lista de items de Google Books
+ */
+export async function fetchGoogleBooks(query, isIsbn = true) {
+  const prefix = isIsbn ? `isbn:${query}` : encodeURIComponent(query);
+  try {
+    const res = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${prefix}`);
+    const data = await res.json();
+    return data.items || [];
+  } catch (err) {
+    console.error('[search.js] fetchGoogleBooks error', err);
+    showError('Error al consultar Google Books');
+    return [];
+  }
+}
 
 // Carga todos los libros ordenados por ID descendente
 export async function loadAllBooks() {
@@ -25,7 +47,7 @@ export async function loadAllBooks() {
 function displayAllBooks(books) {
   const lista = document.getElementById('libros-lista');
   lista.innerHTML = '';
-  if (books.length === 0) {
+  if (!books.length) {
     lista.textContent = 'No hay libros en la biblioteca.';
     return;
   }
@@ -81,16 +103,12 @@ export async function searchBooks() {
     // Si no hay resultados locales y es ISBN válido, consulta Google Books
     const isbnRegex = /^(?:\d{10}|\d{13})$/;
     if (!exactMatches.length && isbnRegex.test(query)) {
-      const googleData = await fetch(
-        `https://www.googleapis.com/books/v1/volumes?q=isbn:${query}`
-      ).then(res => res.json());
-      renderGoogleResults(googleData.items || []);
+      const items = await fetchGoogleBooks(query);
+      renderGoogleResults(items);
     } else if (!exactMatches.length && !partialMatches.length) {
       // Búsqueda por texto libre en Google Books
-      const googleData = await fetch(
-        `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}`
-      ).then(res => res.json());
-      renderGoogleResults(googleData.items || []);
+      const items = await fetchGoogleBooks(query, false);
+      renderGoogleResults(items);
     }
 
   } catch (error) {
@@ -101,7 +119,7 @@ export async function searchBooks() {
 // Inicializa el evento de búsqueda y carga inicial de libros
 export function initSearch() {
   const form = document.getElementById('searchForm');
-  form.addEventListener('submit', async e => {
+  form?.addEventListener('submit', async e => {
     e.preventDefault();
     await searchBooks();
   });

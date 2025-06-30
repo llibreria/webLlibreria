@@ -4,9 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Catálogo de Libros</title>
-  <link rel="stylesheet" href="style.css" />
+  <!-- Ruta absoluta para evitar problemas de carga en navegación -->
+  <link rel="stylesheet" href="./style.css" />
+  <!-- Carga primero la librería de Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
-  <script src="script.js" defer></script>
+  <!-- Después tu script, usando ruta absoluta -->
+  <script src="./llista.js" defer></script>
+  
 </head>
 <body>
   <header class="header">
@@ -15,5 +19,34 @@
   <main class="container">
     <!-- Las tarjetas se cargarán aquí -->
   </main>
+  <div class="bottom-nav">
+  <button class="nav-btn" onclick="window.location.href='buscar.html'">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="11" cy="11" r="8"></circle>
+      <path d="21 21l-4.35-4.35"></path>
+    </svg>
+    <span>Buscar</span>
+  </button>
+  
+  <button class="nav-btn" onclick="window.location.href='afegir.html'">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <line x1="12" y1="5" x2="12" y2="19"></line>
+      <line x1="5" y1="12" x2="19" y2="12"></line>
+    </svg>
+    <span>Añadir</span>
+  </button>
+  
+  <button class="nav-btn nav-btn-primary" onclick="window.location.href='llista.html'">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <line x1="8" y1="6" x2="21" y2="6"></line>
+      <line x1="8" y1="12" x2="21" y2="12"></line>
+      <line x1="8" y1="18" x2="21" y2="18"></line>
+      <line x1="3" y1="6" x2="3.01" y2="6"></line>
+      <line x1="3" y1="12" x2="3.01" y2="12"></line>
+      <line x1="3" y1="18" x2="3.01" y2="18"></line>
+    </svg>
+    <span>Lista</span>
+  </button>
+</div>
 </body>
 </html>

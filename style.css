@@ -1,0 +1,604 @@
+/* Global */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background: #f5f5f5;
+  color: #333;
+  min-height: 100vh;
+  padding-bottom: 80px;
+}
+.header {
+  text-align: center;
+  padding: 2rem 0;
+  background: white;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  margin-bottom: 1rem;
+}
+.container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1rem;
+  padding: 0 1rem 2rem;
+}
+.card {
+  background: white;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  cursor: pointer;
+  transition: transform 0.2s;
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.card:hover {
+  transform: translateY(-4px);
+}
+.card h2 {
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+.card p {
+  font-size: 0.9rem;
+  margin-bottom: 0.25rem;
+}
+@media (max-width: 480px) {
+  .header {
+    padding: 1rem 0;
+  }
+  .container {
+    grid-template-columns: 1fr;
+    padding: 0 0.5rem 1rem;
+  }
+  .card {
+    font-size: 0.95rem;
+    padding: 0.75rem;
+  }
+  .card h2 {
+    font-size: 1rem;
+  }
+  .card p {
+    font-size: 0.85rem;
+  }
+}
+
+/*CSS de Ficha*/
+.ficha-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+}
+
+.ficha-header button {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.ficha-container {
+  padding: 1rem;
+  font-size: 1rem;
+}
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  backdrop-filter: blur(4px);
+  background-color: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal.hidden {
+  display: none;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  width: 90%;
+  max-width: 400px;
+  position: relative;
+}
+
+.close-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  cursor: pointer;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.modal-actions button {
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+}
+
+/* Tamaño y legibilidad */
+.titulo-grande { font-size: 2rem; margin: 0.5rem 0; }
+.texto-grande { font-size: 1.125rem; line-height: 1.5; margin: 0.75rem 0; }
+
+/* Botones de acción */
+.accion-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+.accion-eliminar {
+  margin-top: 1rem;
+  text-align: center;
+}
+.btn-accion {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  cursor: pointer;
+  flex: 1;
+  transition: transform 0.2s;
+}
+.btn-accion:hover { transform: translateY(-2px); }
+
+.btn-primary { background-color: #007aff; color: white; }
+.btn-secondary { background-color: #34c759; color: white; }
+.btn-danger { background-color: #ff3b30; color: white; }
+
+/* Icon button */
+.btn-icon {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+/* ===================== Mejora de Modales ===================== */
+.modal-content {
+  background: white;
+  border-radius: 1rem;
+  padding: 2rem;          /* Más espacio interior */
+  width: 90%;
+  max-width: 400px;
+  position: relative;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.2); /* Sombra más pronunciada */
+}
+
+/* Encabezados dentro de modal */
+.modal-content h2 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+/* Inputs y selects dentro de modales */
+.modal-content input,
+.modal-content select {
+  width: 100%;
+  padding: 0.75rem;
+  margin: 0.5rem 0 1rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 0.5rem;
+  transition: border-color 0.2s;
+}
+.modal-content input:focus,
+.modal-content select:focus {
+  outline: none;
+  border-color: #007aff;
+}
+
+/* ===================== Botones mejorados ===================== */
+.modal-actions button,
+.btn-accion {
+  padding: 0.75rem 1.25rem;
+  border-radius: 0.75rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+
+.modal-actions button:hover,
+.btn-accion:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+}
+
+/* Colores refinados */
+.btn-primary {
+  background: linear-gradient(135deg, #0068e0, #007aff);
+  color: white;
+}
+.btn-secondary {
+  background: linear-gradient(135deg, #28a745, #34c759);
+  color: white;
+}
+.btn-danger {
+  background: linear-gradient(135deg, #d93025, #ff3b30);
+  color: white;
+}
+
+/* Botón de cerrar más visible */
+.close-btn {
+  font-size: 1.25rem;
+  color: #666;
+  transition: color 0.2s;
+}
+.close-btn:hover {
+  color: #000;
+}
+
+/* Para el fondo del modal */
+.modal {
+  background-color: rgba(0,0,0,0.4);
+  backdrop-filter: blur(2px);
+}
+
+/* Confirm buttons in modals: fondo más oscuro */
+.modal-actions button:last-child {
+background-color: #333 !important;
+color: white !important;
+}
+.modal-actions button:last-child:hover {
+background-color: #000 !important;
+}
+
+/* Layout ficha: texto vs. imagen */
+.ficha-container {
+  padding: 2rem;
+}
+.ficha-content {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 2rem;
+  max-width: 900px;
+  margin: 0 auto;
+}
+.ficha-texto {
+  flex: 1;
+}
+.ficha-imagen {
+  flex: 0 0 200px;
+}
+.portada {
+  width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* Responsivo: columna en móviles */
+@media (max-width: 600px) {
+  .ficha-content {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  .ficha-imagen {
+    width: 60%;
+  }
+}
+
+/* Espaciado extra entre secciones */
+.ficha-texto p,
+.ficha-texto .texto-grande,
+.accion-row,
+.accion-eliminar {
+  margin-bottom: 1.5rem;
+}
+.accion-row {
+  margin-top: 2rem;
+}
+
+/*CSS de buscar*/
+.search-bar {
+  display: flex;
+  gap: 0.5rem;
+  margin: 2rem auto;
+  max-width: 600px;
+}
+.search-bar input {
+  flex: 1;
+  padding: 0.75rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 0.5rem;
+}
+.search-bar button {
+  padding: 0.75rem 1.5rem;
+}
+.result-section {
+  margin-top: 2rem;
+}
+.result-section h2 {
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+}
+.grid-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+}
+.hidden { display: none; }
+
+/* Asegura que la barra de búsqueda ocupe todo el ancho y empuje resultados abajo */
+.search-bar {
+  display: block;          /* no flex container general */
+  width: 100%;
+  max-width: 600px;
+  margin: 2rem auto 1rem;
+  padding: 0 1rem;
+}
+
+/* Cada sección de resultados se renderiza en bloque y con espacio */
+.result-section {
+  display: block;
+  margin: 2rem auto;
+  max-width: 900px;
+  padding: 0 1rem;
+}
+
+/* Evita que .container fuerce un layout de rejilla a todo */
+main.container {
+  display: block;
+  padding-bottom: 2rem;
+}
+
+/* Search layout fixes */
+main.container {
+  display: block;
+  padding: 1rem 0 2rem;
+}
+.search-bar {
+  display: block;
+  width: 100%;
+  max-width: 600px;
+  margin: 2rem auto 1rem;
+  padding: 0 1rem;
+}
+.result-section {
+  display: block;
+  margin: 2rem auto;
+  max-width: 900px;
+  padding: 0 1rem;
+}
+
+/* —————— Búsqueda: barra y secciones —————— */
+main.container {
+  display: block;
+  padding: 1rem 0 2rem;
+}
+
+.search-bar {
+  display: block;
+  width: 100%;
+  max-width: 600px;
+  margin: 2rem auto 1rem;
+  padding: 0 1rem;
+}
+
+.search-bar input {
+  width: calc(100% - 6.5rem);
+  padding: 0.75rem;
+  font-size: 1rem;
+}
+
+.search-bar button {
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+}
+
+/* Secciones de resultados */
+.result-section {
+  display: block;
+  margin: 2rem auto;
+  max-width: 900px;
+  padding: 0 1rem;
+}
+
+.result-section h2 {
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.grid-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.hidden {
+  display: none;
+}
+
+/* ◉ Espacio general entre secciones */
+section {
+  margin-top: 2.5em;
+  padding-top: 0.5em;
+  border-top: 1px solid #ddd;
+}
+
+/* ◉ Formulario de búsqueda */
+#search-form {
+  display: flex;
+  gap: 0.5em;
+  margin-bottom: 1.5em;
+}
+
+#search-input {
+  flex: 1;
+  padding: 0.75em 1em;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+#search-form button {
+  padding: 0.75em 1.5em;
+  font-size: 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+/* ◉ Mensaje de Google Books */
+#google-message {
+  margin: 1.5em 0;
+  padding: 1em;
+  background: #f9f9f9;
+  border-left: 4px solid #888;
+  border-radius: 4px;
+  line-height: 1.5;
+}
+
+/* ◉ Contenedor de tarjetas */
+.book-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1.5em;
+  margin-top: 1em;
+}
+
+/* ◉ Tarjetas */
+.card {
+  display: block;
+  padding: 1.25em;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  text-decoration: none;
+  color: inherit;
+  transition: box-shadow 0.2s ease;
+}
+
+.card:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+/* ◉ Contenido interno de la tarjeta */
+.card h2 {
+  margin: 0 0 0.75em;
+  font-size: 1.1rem;
+  line-height: 1.3;
+}
+
+.card p {
+  margin: 0.5em 0;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+/* ◉ Texto cuando no hay resultados */
+.book-empty {
+  font-style: italic;
+  color: #666;
+  padding: 1em;
+}
+
+/* ◉ Ajustes responsive */
+@media (max-width: 600px) {
+  .book-list {
+    grid-template-columns: 1fr;
+  }
+}
+.suggestions {
+  position: relative;
+}
+.suggestions-list {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-top: none;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 10;
+}
+.suggestions-list div {
+  padding: 0.5em 1em;
+  cursor: pointer;
+}
+.suggestions-list div:hover {
+  background: #f0f0f0;
+}
+
+body {
+  padding-bottom: 80px;
+}
+
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+}
+
+.nav-btn {
+  background: none;
+  border: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.5rem 1rem;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: #666;
+  font-size: 0.75rem;
+  font-weight: 500;
+  min-width: 60px;
+}
+
+.nav-btn:hover {
+  background: rgba(102, 126, 234, 0.1);
+  color: #667eea;
+  transform: translateY(-2px);
+}
+
+.nav-btn-primary {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.nav-btn-primary:hover {
+  background: linear-gradient(135deg, #5a6fd8, #6a42a0);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}

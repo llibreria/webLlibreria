@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Buscar libros</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary-color: #667eea;
+      --primary-dark: #5a67d8;
+      --secondary-color: #764ba2;
+      --accent-color: #f093fb;
+      --background-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      --card-shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.15);
+      --text-primary: #2d3748;
+      --text-secondary: #718096;
+      --background-light: #f7fafc;
+      --border-color: #e2e8f0;
+      --success-color: #48bb78;
+      --warning-color: #ed8936;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: var(--background-gradient);
+      min-height: 100vh;
+      color: var(--text-primary);
+      line-height: 1.6;
+      padding-bottom: 80px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem 1rem;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      margin-bottom: 3rem;
+      padding: 2rem 0;
+    }
+
+    .header h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: white;
+      margin-bottom: 0.5rem;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .header p {
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 1.1rem;
+      font-weight: 300;
+    }
+
+    /* Search Form */
+    .search-section {
+      background: white;
+      border-radius: 20px;
+      padding: 2rem;
+      margin-bottom: 3rem;
+      box-shadow: var(--card-shadow);
+      backdrop-filter: blur(10px);
+    }
+
+    #search-form {
+      display: flex;
+      gap: 1rem;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    #search-input {
+      flex: 1;
+      padding: 1rem 1.5rem;
+      border: 2px solid var(--border-color);
+      border-radius: 50px;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      background: var(--background-light);
+    }
+
+    #search-input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      background: white;
+    }
+
+    #search-form button {
+      padding: 1rem 2rem;
+      background: var(--background-gradient);
+      color: white;
+      border: none;
+      border-radius: 50px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      white-space: nowrap;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    #search-form button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    }
+
+    #search-form button:active {
+      transform: translateY(0);
+    }
+
+    /* Google Message */
+    #google-message {
+      background: linear-gradient(135deg, var(--success-color), #38a169);
+      color: white;
+      padding: 1rem 1.5rem;
+      border-radius: 15px;
+      margin: 1rem 0 2rem 0;
+      box-shadow: 0 4px 15px rgba(72, 187, 120, 0.3);
+      font-weight: 500;
+      display: none;
+    }
+
+    #google-message:not(:empty) {
+      display: block;
+      animation: slideDown 0.5s ease;
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Results Sections */
+    .results-container {
+      display: grid;
+      gap: 2rem;
+    }
+
+    .result-section {
+      background: white;
+      border-radius: 20px;
+      padding: 2rem;
+      box-shadow: var(--card-shadow);
+      transition: all 0.3s ease;
+    }
+
+    .result-section.hidden {
+      display: none;
+    }
+
+    .result-section:hover {
+      box-shadow: var(--card-shadow-hover);
+    }
+
+    .result-section h2 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .result-section h2::before {
+      content: '';
+      width: 4px;
+      height: 1.5rem;
+      background: var(--background-gradient);
+      border-radius: 2px;
+    }
+
+    /* Book Cards */
+    .book-list {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .card {
+      display: block;
+      background: var(--background-light);
+      border: 1px solid var(--border-color);
+      border-radius: 15px;
+      padding: 1.5rem;
+      text-decoration: none;
+      color: inherit;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--background-gradient);
+      transform: scaleX(0);
+      transition: transform 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--card-shadow);
+      border-color: var(--primary-color);
+      background: white;
+    }
+
+    .card:hover::before {
+      transform: scaleX(1);
+    }
+
+    .card h2 {
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: var(--text-primary);
+      line-height: 1.4;
+    }
+
+    .card p {
+      margin-bottom: 0.3rem;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+
+    .card p strong {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    .book-empty {
+      text-align: center;
+      color: var(--text-secondary);
+      font-style: italic;
+      padding: 2rem;
+      background: var(--background-light);
+      border-radius: 15px;
+      border: 2px dashed var(--border-color);
+    }
+
+    /* Bottom Navigation */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      border-top: 1px solid rgba(0, 0, 0, 0.1);
+      display: flex;
+      justify-content: space-around;
+      padding: 0.75rem 0;
+      z-index: 1000;
+    }
+
+    .nav-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.25rem;
+      background: none;
+      border: none;
+      color: #6c757d;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      padding: 0.5rem;
+      border-radius: 12px;
+      min-width: 60px;
+    }
+
+    .nav-btn:hover {
+      color: var(--primary-color);
+      background: rgba(102, 126, 234, 0.1);
+      transform: translateY(-2px);
+    }
+
+    .nav-btn-primary {
+      color: var(--primary-color);
+      background: rgba(102, 126, 234, 0.15);
+    }
+
+    .nav-btn svg {
+      width: 24px;
+      height: 24px;
+      stroke-width: 2;
+    }
+
+    .nav-btn span {
+      font-weight: 500;
+      font-size: 0.75rem;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .container {
+        padding: 1rem;
+      }
+
+      .header h1 {
+        font-size: 2rem;
+      }
+
+      #search-form {
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      #search-form button {
+        padding: 1rem;
+      }
+
+      .search-section, .result-section {
+        padding: 1.5rem;
+        border-radius: 15px;
+      }
+
+      .card {
+        padding: 1rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .header h1 {
+        font-size: 1.8rem;
+      }
+
+      .search-section, .result-section {
+        padding: 1rem;
+      }
+
+      .result-section h2 {
+        font-size: 1.3rem;
+      }
+    }
+
+    /* Loading animation */
+    .loading {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Accessibility improvements */
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    /* Focus styles for better accessibility */
+    .card:focus,
+    #search-input:focus,
+    #search-form button:focus {
+      outline: 2px solid var(--primary-color);
+      outline-offset: 2px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <h1>Buscar en mi biblioteca</h1>
+      <p>Encuentra tus libros por ISBN, título o autor</p>
+    </header>
+
+    <div class="search-section">
+      <form id="search-form">
+        <input type="text" id="search-input" placeholder="ISBN, título o autor" autocomplete="off">
+        <button type="submit">Buscar</button>
+      </form>
+      
+      <div id="google-message"></div>
+    </div>
+
+    <div class="results-container">
+      <section class="result-section">
+        <h2>Coincidencia por ISBN</h2>
+        <div id="isbn-list" class="book-list"></div>
+      </section>
+      
+      <section class="result-section">
+        <h2>Coincidencia por Título</h2>
+        <div id="titulo-list" class="book-list"></div>
+      </section>
+      
+      <section class="result-section">
+        <h2>Coincidencia por Autor</h2>
+        <div id="autor-list" class="book-list"></div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    // === CONFIGURA TUS CREDENCIALES ===
+    const SUPABASE_URL = 'https://vrbheaswtkheyxswnhrp.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZyYmhlYXN3dGtoZXl4c3duaHJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ4MjkzMDcsImV4cCI6MjA2MDQwNTMwN30.3lrx_kJwp7uHbhu9IgKGTM5Somobi4tjTiYdCtEYW1o'; // sigue recomendando .env en producción
+    // ==================================
+
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const params = new URLSearchParams(window.location.search);
+      const text   = params.get('text');
+      if (text) {
+        document.querySelector('#search-input').value = text;
+        performSearch(text);
+      }
+      document.querySelector('#search-form').addEventListener('submit', e => {
+        e.preventDefault();
+        const q = document.querySelector('#search-input').value.trim();
+        if (q) {
+          window.location.href =
+            `${window.location.pathname}?text=${encodeURIComponent(q)}`;
+        }
+      });
+    });
+
+    /**
+ * Quita tildes, signos de puntuación y pasa a minúsculas.
+ */
+function normalizeText(str) {
+  return str
+    // descompone en letras + diacríticos
+    .normalize('NFD')
+    // elimina marcas diacríticas
+    .replace(/[\u0300-\u036f]/g, '')
+    // elimina puntuación (comas, puntos, guiones, paréntesis, etc.)
+    .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()¿?¡!"""'']/g, '')
+    // espacios múltiples a uno
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLowerCase();
+}
+
+
+    async function performSearch(q) {
+      // Limpia todas las listas y oculta todas las secciones
+      ['isbn','titulo','autor'].forEach(id => {
+        const el = document.querySelector(`#${id}-list`);
+        const section = el?.closest('.result-section');
+        if (el) el.innerHTML = '';
+        if (section) section.classList.add('hidden');
+      });
+      document.querySelector('#google-message').innerHTML = '';
+
+      // 1) Búsqueda local de ISBN
+      let byISBN = await searchByISBN(q);
+
+      // 2) Si no hay local y parece ISBN, consulta Google Books
+      if (byISBN.length === 0 && /^[0-9\-]{10,17}$/.test(q)) {
+        const gb = await fetchFromGoogleISBN(q);
+        if (gb) {
+          // Mensaje bajo la búsqueda
+          document.querySelector('#google-message').innerHTML =
+            `ISBN no hallado localmente. Datos Google Books:<br>` +
+            `<strong>${gb.titol}</strong> — ${gb.autor}`;
+
+          // Re-búsqueda en BD por título y autor de Google
+          const [tits, auts] = await Promise.all([
+            searchByTitle(gb.titol),
+            searchByAuthor(gb.autor)
+          ]);
+
+          // Renderizamos sólo título y autor
+renderCards('titulo-list', tits);
+renderCards('autor-list',  auts);
+          return;
+        }
+      }
+
+      // 3) Búsqueda normal de título y autor
+      const [byTitle, byAuthor] = await Promise.all([
+        searchByTitle(q),
+        searchByAuthor(q)
+      ]);
+
+      // Renderizamos las tres secciones
+      renderCards('isbn-list',   byISBN);
+renderCards('titulo-list', byTitle);
+renderCards('autor-list',  byAuthor);
+    }
+
+    // ─── Plantillas ───────────────────────────────────────────────────────────
+
+    const tplCardWithISBN = item => `
+      <a class="book-card" href="/ficha.html?id=${item.id}">
+        <div class="book-card-content">
+          <div class="book-title">${item.titol}</div>
+          <div class="book-meta">
+            <span class="book-isbn">ISBN: ${item.isbn || '—'}</span>
+          </div>
+        </div>
+      </a>`;
+
+    const tplCardWithAuthor = item => `
+      <a class="book-card" href="/ficha.html?id=${item.id}">
+        <div class="book-card-content">
+          <div class="book-title">${item.titol}</div>
+          <div class="book-meta">
+            <span class="book-author">${item.autorNombre}</span>
+          </div>
+        </div>
+      </a>`;
+
+    // ─── Funciones de búsqueda ────────────────────────────────────────────────
+
+    async function searchByISBN(isbn) {
+  // Traemos libro + autor(nombre) en un solo golpe
+  const { data, error } = await supabaseClient
+    .from('libros')
+    .select(`
+      id,
+      titol,
+      isbn,
+      autores ( nombre )
+    `)
+    .eq('isbn', isbn);
+
+  if (error) {
+    console.error('Supabase ISBN search error:', error);
+    return [];
+  }
+  // Mapeamos cada libro para sacar autorNombre de la relación
+  return (data || []).map(libro => ({
+    id: libro.id,
+    titol: libro.titol,
+    isbn: libro.isbn,
+    autorNombre: libro.autores?.nombre ?? 'Desconocido'
+  }));
+}
+
+
+    async function fetchFromGoogleISBN(isbn) {
+      try {
+        const res = await fetch(
+          `https://www.googleapis.com/books/v1/volumes` +
+          `?q=isbn:${encodeURIComponent(isbn)}`
+        );
+        const json = await res.json();
+        if (json.totalItems > 0 && json.items[0].volumeInfo) {
+          const info  = json.items[0].volumeInfo;
+          return {
+            titol: info.title || '',
+            autor: (info.authors && info.authors[0]) || ''
+          };
+        }
+      } catch (e) {
+        console.error('Google Books API error:', e);
+      }
+      return null;
+    }
+
+    async function searchByTitle(text) {
+  const normQuery = normalizeText(text);
+
+  // 1) Traemos todos los libros
+  const { data: libros, error: errL } = await supabaseClient
+    .from('libros')
+    .select('id,titol,isbn,autor_id');
+
+  if (errL) {
+    console.error('Supabase title fetch error:', errL);
+    return [];
+  }
+
+  // 2) Filtramos por título normalizado
+  const filtrados = libros.filter(l =>
+    normalizeText(l.titol).includes(normQuery)
+  );
+
+  if (filtrados.length === 0) return [];
+
+  // 3) Inyectamos autorNombre igual que antes
+  const resultados = [];
+  for (const libro of filtrados) {
+    const { data: autor, error: errA } = await supabaseClient
+      .from('autores')
+      .select('nombre')
+      .eq('id', libro.autor_id)
+      .single();
+
+    resultados.push({
+      ...libro,
+      autorNombre: errA ? 'Desconocido' : autor.nombre
+    });
+  }
+  return resultados;
+}
+
+
+    async function searchByAuthor(text) {
+  const normQuery = normalizeText(text);
+
+  // 1) Traemos todos los autores
+  const { data: autores, error: errA } = await supabaseClient
+    .from('autores')
+    .select('id,nombre');
+
+  if (errA) {
+    console.error('Supabase author fetch error:', errA);
+    return [];
+  }
+
+  // 2) Filtramos por nombre normalizado
+  const autoresFiltrados = autores.filter(a =>
+    normalizeText(a.nombre).includes(normQuery)
+  );
+
+  if (autoresFiltrados.length === 0) return [];
+
+  // 3) Para cada autor filtrado, traemos sus libros
+  let resultados = [];
+  for (const autor of autoresFiltrados) {
+    const { data: libros, error: errL } = await supabaseClient
+      .from('libros')
+      .select('id,titol,isbn')
+      .eq('autor_id', autor.id);
+
+    if (errL) {
+      console.error('Supabase books by author error:', errL);
+      continue;
+    }
+
+    resultados = resultados.concat(
+      libros.map(libro => ({ ...libro, autorNombre: autor.nombre }))
+    );
+  }
+  return resultados;
+}
+
+
+    function renderList(sectionId, data, tpl) {
+      const container = document.querySelector(`#${sectionId}-list`);
+      if (!container) return;
+      if (!data || data.length === 0) {
+        container.innerHTML = '<p class="book-empty">No hay coincidencias</p>';
+      } else {
+        container.innerHTML = data.map(tpl).join('');
+      }
+    }
+/**
+ * Renderiza tarjetas igual que en llista.js :contentReference[oaicite:1]{index=1}
+ * @param {string} sectionId — id del contenedor (p.ej. 'isbn-list')
+ * @param {Array} books — array de objetos { id, titol, isbn, autorNombre }
+ */
+function renderCards(sectionId, books) {
+  const container = document.querySelector(`#${sectionId}`);
+  const section = container?.closest('.result-section');
+  
+  if (!container) return;
+
+  // Limpia contenido previo
+  container.innerHTML = '';
+
+  if (!books || books.length === 0) {
+    // Oculta la sección completa si no hay resultados
+    if (section) section.classList.add('hidden');
+    return;
+  }
+
+  // Muestra la sección si hay resultados
+  if (section) section.classList.remove('hidden');
+
+  books.forEach(book => {
+    const link = document.createElement('a');
+    link.href = `ficha.html?id=${book.id}`;
+    link.className = 'card';  // coincide con .card de llista.css
+
+    link.innerHTML = `
+      <h2>${book.titol}</h2>
+      <p><strong>Autor:</strong> ${book.autorNombre}</p>
+      <p><strong>ISBN:</strong> ${book.isbn || 'N/A'}</p>
+    `;
+    container.appendChild(link);
+  });
+}
+
+  </script>
+  <div class="bottom-nav">
+  <button class="nav-btn nav-btn-primary" onclick="window.location.href='buscar.html'">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="11" cy="11" r="8"></circle>
+      <path d="21 21l-4.35-4.35"></path>
+    </svg>
+    <span>Buscar</span>
+  </button>
+  
+  <button class="nav-btn" onclick="window.location.href='afegir.html'">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <line x1="12" y1="5" x2="12" y2="19"></line>
+      <line x1="5" y1="12" x2="19" y2="12"></line>
+    </svg>
+    <span>Añadir</span>
+  </button>
+  
+  <button class="nav-btn" onclick="window.location.href='llista.html'">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <line x1="8" y1="6" x2="21" y2="6"></line>
+      <line x1="8" y1="12" x2="21" y2="12"></line>
+      <line x1="8" y1="18" x2="21" y2="18"></line>
+      <line x1="3" y1="6" x2="3.01" y2="6"></line>
+      <line x1="3" y1="12" x2="3.01" y2="12"></line>
+      <line x1="3" y1="18" x2="3.01" y2="18"></line>
+    </svg>
+    <span>Lista</span>
+  </button>
+</div>
+</body>
+</html>

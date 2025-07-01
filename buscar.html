@@ -77,12 +77,14 @@
     #search-form {
       display: flex;
       gap: 1rem;
-      max-width: 600px;
+      max-width: 800px;
       margin: 0 auto;
+      flex-wrap: wrap;
     }
 
     #search-input {
       flex: 1;
+      min-width: 250px;
       padding: 1rem 1.5rem;
       border: 2px solid var(--border-color);
       border-radius: 50px;
@@ -119,6 +121,45 @@
 
     #search-form button:active {
       transform: translateY(0);
+    }
+
+    /* Estilos para el botón de escaneo */
+    .scan-btn {
+      padding: 15px 40px;
+      background: transparent;
+      border: 2px solid #667eea;
+      color: #667eea;
+      border-radius: 12px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .scan-btn:hover {
+      background: #667eea;
+      color: white;
+    }
+
+    .scan-btn:focus {
+      outline: 2px solid var(--primary-color);
+      outline-offset: 2px;
+    }
+
+    /* Video container */
+    .video-container {
+      margin: 20px auto;
+      text-align: center;
+    }
+
+    /* Estilos para el video */
+    #scanner-video {
+      display: none;
+      width: 100%;
+      max-width: 480px;
+      border-radius: 12px;
+      margin: 20px auto;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
     }
 
     /* Google Message */
@@ -266,51 +307,48 @@
       bottom: 0;
       left: 0;
       right: 0;
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(20px);
-      border-top: 1px solid rgba(0, 0, 0, 0.1);
+      background: white;
+      border-top: 1px solid var(--border-color);
       display: flex;
       justify-content: space-around;
-      padding: 0.75rem 0;
-      z-index: 1000;
+      padding: 10px 0;
+      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
     }
 
     .nav-btn {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 0.25rem;
-      background: none;
+      gap: 5px;
+      padding: 10px;
       border: none;
-      color: #6c757d;
-      font-size: 0.75rem;
+      background: none;
+      color: var(--text-secondary);
+      text-decoration: none;
       cursor: pointer;
+      border-radius: 8px;
       transition: all 0.3s ease;
-      padding: 0.5rem;
-      border-radius: 12px;
-      min-width: 60px;
     }
 
     .nav-btn:hover {
-      color: var(--primary-color);
-      background: rgba(102, 126, 234, 0.1);
-      transform: translateY(-2px);
+      background: var(--background-light);
     }
 
     .nav-btn-primary {
-      color: var(--primary-color);
-      background: rgba(102, 126, 234, 0.15);
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
     }
 
-    .nav-btn svg {
-      width: 24px;
-      height: 24px;
-      stroke-width: 2;
+    .nav-btn-primary:hover {
+      background: linear-gradient(135deg, #5a6fd8, #6a42a0);
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
     }
 
     .nav-btn span {
-      font-weight: 500;
       font-size: 0.75rem;
+      font-weight: 500;
     }
 
     /* Responsive Design */
@@ -326,6 +364,10 @@
       #search-form {
         flex-direction: column;
         gap: 1rem;
+      }
+
+      #search-input {
+        min-width: auto;
       }
 
       #search-form button {
@@ -387,130 +429,6 @@
       outline: 2px solid var(--primary-color);
       outline-offset: 2px;
     }
-    /* Camera Scanner Styles */
-.camera-container {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.9);
-  z-index: 2000;
-  display: none;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
-.camera-container.active {
-  display: flex;
-}
-
-.camera-header {
-  color: white;
-  text-align: center;
-  margin-bottom: 1rem;
-  padding: 1rem;
-}
-
-.camera-header h3 {
-  font-size: 1.5rem;
-  margin-bottom: 0.5rem;
-}
-
-.camera-header p {
-  opacity: 0.8;
-}
-
-.camera-video {
-  width: 90%;
-  max-width: 400px;
-  border-radius: 15px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-}
-
-.camera-controls {
-  display: flex;
-  gap: 1rem;
-  margin-top: 1.5rem;
-}
-
-.camera-btn {
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 25px;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.camera-btn-close {
-  background: #e53e3e;
-  color: white;
-}
-
-.camera-btn-close:hover {
-  background: #c53030;
-  transform: translateY(-2px);
-}
-
-.camera-btn-toggle {
-  background: var(--primary-color);
-  color: white;
-}
-
-.camera-btn-toggle:hover {
-  background: var(--primary-dark);
-  transform: translateY(-2px);
-}
-
-.scanning-overlay {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 250px;
-  height: 150px;
-  border: 2px solid var(--accent-color);
-  border-radius: 10px;
-  pointer-events: none;
-}
-
-.scanning-line {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: var(--accent-color);
-  animation: scanLine 2s linear infinite;
-}
-
-@keyframes scanLine {
-  0% { top: 0; }
-  100% { top: 100%; }
-}
-.camera-scan-btn {
-  padding: 1rem;
-  background: var(--secondary-color);
-  color: white;
-  border: none;
-  border-radius: 50px;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  white-space: nowrap;
-  display: inline-block;
-  align-items: center;
-  gap: 0.5rem;
-  box-shadow: 0 4px 15px rgba(118, 75, 162, 0.3);
-}
-
-.camera-scan-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(118, 75, 162, 0.4);
-}
   </style>
 </head>
 <body>
@@ -524,24 +442,13 @@
       <form id="search-form">
         <input type="text" id="search-input" placeholder="ISBN, título o autor" autocomplete="off">
         <button type="submit">Buscar</button>
-        <button type="button" id="camera-btn" class="camera-scan-btn">📷 Escanear ISBN </button>
+        <button type="button" class="scan-btn" id="scanBtn">📷 Escanear ISBN</button>
       </form>
-      <div id="camera-container" class="camera-container">
-  <div class="camera-header">
-    <h3>Escanear código de barras</h3>
-    <p>Apunta la cámara hacia el código de barras del libro</p>
-  </div>
-  <div style="position: relative;">
-    <video id="camera-video" class="camera-video" autoplay playsinline></video>
-    <div class="scanning-overlay">
-      <div class="scanning-line"></div>
-    </div>
-  </div>
-  <div class="camera-controls">
-    <button id="camera-close" class="camera-btn camera-btn-close">Cerrar</button>
-    <button id="camera-toggle" class="camera-btn camera-btn-toggle">Cambiar cámara</button>
-  </div>
-</div>
+      
+      <div class="video-container">
+        <video id="scanner-video" autoplay></video>
+      </div>
+      
       <div id="google-message"></div>
     </div>
 
@@ -566,18 +473,29 @@
   <script>
     // === CONFIGURA TUS CREDENCIALES ===
     const SUPABASE_URL = 'https://vrbheaswtkheyxswnhrp.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZyYmhlYXN3dGtoZXl4c3duaHJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ4MjkzMDcsImV4cCI6MjA2MDQwNTMwN30.3lrx_kJwp7uHbhu9IgKGTM5Somobi4tjTiYdCtEYW1o'; // sigue recomendando .env en producción
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZyYmhlYXN3dGtoZXl4c3duaHJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ4MjkzMDcsImV4cCI6MjA2MDQwNTMwN30.3lrx_kJwp7uHbhu9IgKGTM5Somobi4tjTiYdCtEYW1o';
     // ==================================
 
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+    // Variables globales para el escáner
+    let scanning = false;
+    let stream = null;
+    let barcodeDetector = null;
+
+    // Referencias a elementos DOM
+    const scanBtn = document.getElementById('scanBtn');
+    const video = document.getElementById('scanner-video');
+    const searchInput = document.getElementById('search-input');
+
     document.addEventListener('DOMContentLoaded', () => {
       const params = new URLSearchParams(window.location.search);
-      const text   = params.get('text');
+      const text = params.get('text');
       if (text) {
         document.querySelector('#search-input').value = text;
         performSearch(text);
       }
+      
       document.querySelector('#search-form').addEventListener('submit', e => {
         e.preventDefault();
         const q = document.querySelector('#search-input').value.trim();
@@ -586,25 +504,103 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
             `${window.location.pathname}?text=${encodeURIComponent(q)}`;
         }
       });
+
+      // Event listener para el botón de escaneo
+      scanBtn.addEventListener('click', toggleScan);
     });
 
-    /**
- * Quita tildes, signos de puntuación y pasa a minúsculas.
- */
-function normalizeText(str) {
-  return str
-    // descompone en letras + diacríticos
-    .normalize('NFD')
-    // elimina marcas diacríticas
-    .replace(/[\u0300-\u036f]/g, '')
-    // elimina puntuación (comas, puntos, guiones, paréntesis, etc.)
-    .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()¿?¡!"""'']/g, '')
-    // espacios múltiples a uno
-    .replace(/\s+/g, ' ')
-    .trim()
-    .toLowerCase();
-}
+    // Funciones del escáner ISBN
+    async function toggleScan() {
+      if (!('BarcodeDetector' in window)) {
+        alert('Tu navegador no soporta escaneo de códigos de barras. Prueba con Chrome en Android.');
+        return;
+      }
 
+      if (scanning) {
+        stopScan();
+        return;
+      }
+
+      try {
+        barcodeDetector = new BarcodeDetector({ 
+          formats: ['ean_13', 'ean_8', 'code_128', 'code_39'] 
+        });
+        
+        stream = await navigator.mediaDevices.getUserMedia({ 
+          video: { 
+            facingMode: 'environment',
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          } 
+        });
+        
+        video.srcObject = stream;
+        video.style.display = 'block';
+        scanning = true;
+        scanBtn.textContent = 'Detener escaneo';
+        
+        video.addEventListener('loadedmetadata', () => {
+          scanLoop();
+        });
+        
+      } catch (error) {
+        alert('No se pudo activar la cámara. Asegúrate de dar permisos de cámara.');
+        console.error('Error accessing camera:', error);
+      }
+    }
+
+    function stopScan() {
+      scanning = false;
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+        stream = null;
+      }
+      video.style.display = 'none';
+      scanBtn.textContent = '📷 Escanear ISBN';
+    }
+
+    async function scanLoop() {
+      if (!scanning || !video.videoWidth) {
+        requestAnimationFrame(scanLoop);
+        return;
+      }
+      
+      try {
+        const codes = await barcodeDetector.detect(video);
+        if (codes.length > 0) {
+          const isbn = codes[0].rawValue;
+          if (isbn && (isbn.length === 10 || isbn.length === 13)) {
+            stopScan();
+            // Insertar ISBN en el campo de input
+            searchInput.value = isbn;
+            // Ejecutar búsqueda automáticamente
+            performSearch(isbn);
+            return;
+          }
+        }
+      } catch (error) {
+        console.error('Error detecting barcode:', error);
+      }
+      
+      requestAnimationFrame(scanLoop);
+    }
+
+    /**
+     * Quita tildes, signos de puntuación y pasa a minúsculas.
+     */
+    function normalizeText(str) {
+      return str
+        // descompone en letras + diacríticos
+        .normalize('NFD')
+        // elimina marcas diacríticas
+        .replace(/[\u0300-\u036f]/g, '')
+        // elimina puntuación (comas, puntos, guiones, paréntesis, etc.)
+        .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()¿?¡!"""'']/g, '')
+        // espacios múltiples a uno
+        .replace(/\s+/g, ' ')
+        .trim()
+        .toLowerCase();
+    }
 
     async function performSearch(q) {
       // Limpia todas las listas y oculta todas las secciones
@@ -635,8 +631,8 @@ function normalizeText(str) {
           ]);
 
           // Renderizamos sólo título y autor
-renderCards('titulo-list', tits);
-renderCards('autor-list',  auts);
+          renderCards('titulo-list', tits);
+          renderCards('autor-list',  auts);
           return;
         }
       }
@@ -649,59 +645,34 @@ renderCards('autor-list',  auts);
 
       // Renderizamos las tres secciones
       renderCards('isbn-list',   byISBN);
-renderCards('titulo-list', byTitle);
-renderCards('autor-list',  byAuthor);
+      renderCards('titulo-list', byTitle);
+      renderCards('autor-list',  byAuthor);
     }
 
-    // ─── Plantillas ───────────────────────────────────────────────────────────
-
-    const tplCardWithISBN = item => `
-      <a class="book-card" href="/ficha.html?id=${item.id}">
-        <div class="book-card-content">
-          <div class="book-title">${item.titol}</div>
-          <div class="book-meta">
-            <span class="book-isbn">ISBN: ${item.isbn || '—'}</span>
-          </div>
-        </div>
-      </a>`;
-
-    const tplCardWithAuthor = item => `
-      <a class="book-card" href="/ficha.html?id=${item.id}">
-        <div class="book-card-content">
-          <div class="book-title">${item.titol}</div>
-          <div class="book-meta">
-            <span class="book-author">${item.autorNombre}</span>
-          </div>
-        </div>
-      </a>`;
-
-    // ─── Funciones de búsqueda ────────────────────────────────────────────────
-
     async function searchByISBN(isbn) {
-  // Traemos libro + autor(nombre) en un solo golpe
-  const { data, error } = await supabaseClient
-    .from('libros')
-    .select(`
-      id,
-      titol,
-      isbn,
-      autores ( nombre )
-    `)
-    .eq('isbn', isbn);
+      // Traemos libro + autor(nombre) en un solo golpe
+      const { data, error } = await supabaseClient
+        .from('libros')
+        .select(`
+          id,
+          titol,
+          isbn,
+          autores ( nombre )
+        `)
+        .eq('isbn', isbn);
 
-  if (error) {
-    console.error('Supabase ISBN search error:', error);
-    return [];
-  }
-  // Mapeamos cada libro para sacar autorNombre de la relación
-  return (data || []).map(libro => ({
-    id: libro.id,
-    titol: libro.titol,
-    isbn: libro.isbn,
-    autorNombre: libro.autores?.nombre ?? 'Desconocido'
-  }));
-}
-
+      if (error) {
+        console.error('Supabase ISBN search error:', error);
+        return [];
+      }
+      // Mapeamos cada libro para sacar autorNombre de la relación
+      return (data || []).map(libro => ({
+        id: libro.id,
+        titol: libro.titol,
+        isbn: libro.isbn,
+        autorNombre: libro.autores?.nombre ?? 'Desconocido'
+      }));
+    }
 
     async function fetchFromGoogleISBN(isbn) {
       try {
@@ -724,159 +695,148 @@ renderCards('autor-list',  byAuthor);
     }
 
     async function searchByTitle(text) {
-  const normQuery = normalizeText(text);
+      const normQuery = normalizeText(text);
 
-  // 1) Traemos todos los libros
-  const { data: libros, error: errL } = await supabaseClient
-    .from('libros')
-    .select('id,titol,isbn,autor_id');
+      // 1) Traemos todos los libros
+      const { data: libros, error: errL } = await supabaseClient
+        .from('libros')
+        .select('id,titol,isbn,autor_id');
 
-  if (errL) {
-    console.error('Supabase title fetch error:', errL);
-    return [];
-  }
+      if (errL) {
+        console.error('Supabase title fetch error:', errL);
+        return [];
+      }
 
-  // 2) Filtramos por título normalizado
-  const filtrados = libros.filter(l =>
-    normalizeText(l.titol).includes(normQuery)
-  );
+      // 2) Filtramos por título normalizado
+      const filtrados = libros.filter(l =>
+        normalizeText(l.titol).includes(normQuery)
+      );
 
-  if (filtrados.length === 0) return [];
+      if (filtrados.length === 0) return [];
 
-  // 3) Inyectamos autorNombre igual que antes
-  const resultados = [];
-  for (const libro of filtrados) {
-    const { data: autor, error: errA } = await supabaseClient
-      .from('autores')
-      .select('nombre')
-      .eq('id', libro.autor_id)
-      .single();
+      // 3) Inyectamos autorNombre igual que antes
+      const resultados = [];
+      for (const libro of filtrados) {
+        const { data: autor, error: errA } = await supabaseClient
+          .from('autores')
+          .select('nombre')
+          .eq('id', libro.autor_id)
+          .single();
 
-    resultados.push({
-      ...libro,
-      autorNombre: errA ? 'Desconocido' : autor.nombre
-    });
-  }
-  return resultados;
-}
-
+        resultados.push({
+          ...libro,
+          autorNombre: errA ? 'Desconocido' : autor.nombre
+        });
+      }
+      return resultados;
+    }
 
     async function searchByAuthor(text) {
-  const normQuery = normalizeText(text);
+      const normQuery = normalizeText(text);
 
-  // 1) Traemos todos los autores
-  const { data: autores, error: errA } = await supabaseClient
-    .from('autores')
-    .select('id,nombre');
+      // 1) Traemos todos los autores
+      const { data: autores, error: errA } = await supabaseClient
+        .from('autores')
+        .select('id,nombre');
 
-  if (errA) {
-    console.error('Supabase author fetch error:', errA);
-    return [];
-  }
-
-  // 2) Filtramos por nombre normalizado
-  const autoresFiltrados = autores.filter(a =>
-    normalizeText(a.nombre).includes(normQuery)
-  );
-
-  if (autoresFiltrados.length === 0) return [];
-
-  // 3) Para cada autor filtrado, traemos sus libros
-  let resultados = [];
-  for (const autor of autoresFiltrados) {
-    const { data: libros, error: errL } = await supabaseClient
-      .from('libros')
-      .select('id,titol,isbn')
-      .eq('autor_id', autor.id);
-
-    if (errL) {
-      console.error('Supabase books by author error:', errL);
-      continue;
-    }
-
-    resultados = resultados.concat(
-      libros.map(libro => ({ ...libro, autorNombre: autor.nombre }))
-    );
-  }
-  return resultados;
-}
-
-
-    function renderList(sectionId, data, tpl) {
-      const container = document.querySelector(`#${sectionId}-list`);
-      if (!container) return;
-      if (!data || data.length === 0) {
-        container.innerHTML = '<p class="book-empty">No hay coincidencias</p>';
-      } else {
-        container.innerHTML = data.map(tpl).join('');
+      if (errA) {
+        console.error('Supabase author fetch error:', errA);
+        return [];
       }
+
+      // 2) Filtramos por nombre normalizado
+      const autoresFiltrados = autores.filter(a =>
+        normalizeText(a.nombre).includes(normQuery)
+      );
+
+      if (autoresFiltrados.length === 0) return [];
+
+      // 3) Para cada autor filtrado, traemos sus libros
+      let resultados = [];
+      for (const autor of autoresFiltrados) {
+        const { data: libros, error: errL } = await supabaseClient
+          .from('libros')
+          .select('id,titol,isbn')
+          .eq('autor_id', autor.id);
+
+        if (errL) {
+          console.error('Supabase books by author error:', errL);
+          continue;
+        }
+
+        resultados = resultados.concat(
+          libros.map(libro => ({ ...libro, autorNombre: autor.nombre }))
+        );
+      }
+      return resultados;
     }
-/**
- * Renderiza tarjetas igual que en llista.js :contentReference[oaicite:1]{index=1}
- * @param {string} sectionId — id del contenedor (p.ej. 'isbn-list')
- * @param {Array} books — array de objetos { id, titol, isbn, autorNombre }
- */
-function renderCards(sectionId, books) {
-  const container = document.querySelector(`#${sectionId}`);
-  const section = container?.closest('.result-section');
-  
-  if (!container) return;
 
-  // Limpia contenido previo
-  container.innerHTML = '';
+    /**
+     * Renderiza tarjetas igual que en llista.js
+     * @param {string} sectionId — id del contenedor (p.ej. 'isbn-list')
+     * @param {Array} books — array de objetos { id, titol, isbn, autorNombre }
+     */
+    function renderCards(sectionId, books) {
+      const container = document.querySelector(`#${sectionId}`);
+      const section = container?.closest('.result-section');
+      
+      if (!container) return;
 
-  if (!books || books.length === 0) {
-    // Oculta la sección completa si no hay resultados
-    if (section) section.classList.add('hidden');
-    return;
-  }
+      // Limpia contenido previo
+      container.innerHTML = '';
 
-  // Muestra la sección si hay resultados
-  if (section) section.classList.remove('hidden');
+      if (!books || books.length === 0) {
+        // Oculta la sección completa si no hay resultados
+        if (section) section.classList.add('hidden');
+        return;
+      }
 
-  books.forEach(book => {
-    const link = document.createElement('a');
-    link.href = `ficha.html?id=${book.id}`;
-    link.className = 'card';  // coincide con .card de llista.css
+      // Muestra la sección si hay resultados
+      if (section) section.classList.remove('hidden');
 
-    link.innerHTML = `
-      <h2>${book.titol}</h2>
-      <p><strong>Autor:</strong> ${book.autorNombre}</p>
-      <p><strong>ISBN:</strong> ${book.isbn || 'N/A'}</p>
-    `;
-    container.appendChild(link);
-  });
-}
+      books.forEach(book => {
+        const link = document.createElement('a');
+        link.href = `ficha.html?id=${book.id}`;
+        link.className = 'card';
 
+        link.innerHTML = `
+          <h2>${book.titol}</h2>
+          <p><strong>Autor:</strong> ${book.autorNombre}</p>
+          <p><strong>ISBN:</strong> ${book.isbn || 'N/A'}</p>
+        `;
+        container.appendChild(link);
+      });
+    }
   </script>
+
   <div class="bottom-nav">
-  <button class="nav-btn nav-btn-primary" onclick="window.location.href='buscar.html'">
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-      <circle cx="11" cy="11" r="8"></circle>
-      <path d="21 21l-4.35-4.35"></path>
-    </svg>
-    <span>Buscar</span>
-  </button>
-  
-  <button class="nav-btn" onclick="window.location.href='afegir.html'">
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-      <line x1="12" y1="5" x2="12" y2="19"></line>
-      <line x1="5" y1="12" x2="19" y2="12"></line>
-    </svg>
-    <span>Añadir</span>
-  </button>
-  
-  <button class="nav-btn" onclick="window.location.href='llista.html'">
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-      <line x1="8" y1="6" x2="21" y2="6"></line>
-      <line x1="8" y1="12" x2="21" y2="12"></line>
-      <line x1="8" y1="18" x2="21" y2="18"></line>
-      <line x1="3" y1="6" x2="3.01" y2="6"></line>
-      <line x1="3" y1="12" x2="3.01" y2="12"></line>
-      <line x1="3" y1="18" x2="3.01" y2="18"></line>
-    </svg>
-    <span>Lista</span>
-  </button>
-</div>
+    <button class="nav-btn nav-btn-primary" onclick="window.location.href='buscar.html'">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"></circle>
+        <path d="21 21l-4.35-4.35"></path>
+      </svg>
+      <span>Buscar</span>
+    </button>
+    
+    <button class="nav-btn" onclick="window.location.href='afegir.html'">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="12" y1="5" x2="12" y2="19"></line>
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+      </svg>
+      <span>Añadir</span>
+    </button>
+    
+    <button class="nav-btn" onclick="window.location.href='llista.html'">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="8" y1="6" x2="21" y2="6"></line>
+        <line x1="8" y1="12" x2="21" y2="12"></line>
+        <line x1="8" y1="18" x2="21" y2="18"></line>
+        <line x1="3" y1="6" x2="3.01" y2="6"></line>
+        <line x1="3" y1="12" x2="3.01" y2="12"></line>
+        <line x1="3" y1="18" x2="3.01" y2="18"></line>
+      </svg>
+      <span>Lista</span>
+    </button>
+  </div>
 </body>
 </html>

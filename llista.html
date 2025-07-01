@@ -10,43 +10,631 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
   <!-- Después tu script, usando ruta absoluta -->
   <script src="./llista.js" defer></script>
-  
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <style>
+    .controls-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 15px;
+      padding: 5px 0;
+    }
+    
+    .control-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      background: transparent;
+      color: #6c757d;
+      border: 1px solid #e9ecef;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+    
+    .control-btn:hover {
+      background: #f8f9fa;
+      color: #495057;
+      border-color: #ced4da;
+    }
+    
+    .control-btn.active {
+      background: #007bff;
+      color: white;
+      border-color: #007bff;
+    }
+    
+    .control-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+    
+    .dropdown-panel {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      background: white;
+      border: 1px solid #e9ecef;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      padding: 15px;
+      min-width: 280px;
+      z-index: 1000;
+      display: none;
+    }
+    
+    .dropdown-panel.show {
+      display: block;
+    }
+    
+    .panel-title {
+      font-weight: 600;
+      margin-bottom: 15px;
+      color: #495057;
+      font-size: 16px;
+    }
+    
+    .filter-group {
+      margin-bottom: 15px;
+    }
+    
+    .filter-group:last-child {
+      margin-bottom: 0;
+    }
+    
+    .filter-group label {
+      font-weight: 600;
+      margin-bottom: 5px;
+      color: #495057;
+      font-size: 14px;
+      display: block;
+    }
+    
+    .filter-group select,
+    .filter-group input {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid #ced4da;
+      border-radius: 4px;
+      font-size: 14px;
+      background: white;
+    }
+    
+    .filter-group select:focus,
+    .filter-group input:focus {
+      outline: none;
+      border-color: #007bff;
+      box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+    }
+    
+    .author-filter-container {
+      position: relative;
+    }
+    
+    .author-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: white;
+      border: 1px solid #ced4da;
+      border-top: none;
+      border-radius: 0 0 4px 4px;
+      max-height: 150px;
+      overflow-y: auto;
+      z-index: 1001;
+      display: none;
+    }
+    
+    .author-option {
+      padding: 8px 12px;
+      cursor: pointer;
+      border-bottom: 1px solid #f8f9fa;
+    }
+    
+    .author-option:hover {
+      background: #007bff;
+      color: white;
+    }
+    
+    .author-option:last-child {
+      border-bottom: none;
+    }
+    
+    .clear-filters {
+      width: 100%;
+      padding: 8px 16px;
+      background: #6c757d;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      margin-top: 10px;
+    }
+    
+    .clear-filters:hover {
+      background: #5a6268;
+    }
+    
+    .results-info {
+      margin-left: auto;
+      color: #6c757d;
+      font-size: 13px;
+      white-space: nowrap;
+      font-weight: 500;
+    }
+    
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: transparent;
+      z-index: 999;
+      display: none;
+    }
+    
+    .overlay.show {
+      display: block;
+    }
+    
+    @media (max-width: 768px) {
+      .controls-bar {
+        flex-wrap: wrap;
+      }
+      
+      .dropdown-panel {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 90%;
+        max-width: 320px;
+        min-width: auto;
+      }
+      
+      .results-info {
+        width: 80%;
+        margin-left: 0;
+        text-align: right;
+      }
+
+      main.container {
+        padding: 0;
+      }
+
+      .header {
+        margin-bottom: 0px;
+      }
+      .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      z-index: 999;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+    
+    .overlay.show {
+      opacity: 1;
+      visibility: visible;
+    }
+    }
+  </style>
 </head>
 <body>
   <header class="header">
     <h1>Mi Biblioteca</h1>
   </header>
+  
   <main class="container">
+    <!-- Barra de controles -->
+    <div class="controls-bar">
+      <!-- Botón de ordenar -->
+      <div style="position: relative;">
+        <button class="control-btn" id="sort-btn" title="Ordenar">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 6h18M7 12h10m-7 6h4"></path>
+          </svg>
+        </button>
+        
+        <div class="dropdown-panel" id="sort-panel">
+          <div class="panel-title">Ordenar por</div>
+          <div class="filter-group">
+            <select id="sort-select">
+              <option value="arrival">Orden de llegada (más reciente)</option>
+              <option value="title-asc">Título (A-Z)</option>
+              <option value="title-desc">Título (Z-A)</option>
+              <option value="author-asc">Autor (A-Z)</option>
+              <option value="author-desc">Autor (Z-A)</option>
+              <option value="year-asc">Año publicación (más antiguo)</option>
+              <option value="year-desc">Año publicación (más reciente)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Botón de filtrar -->
+      <div style="position: relative;">
+        <button class="control-btn" id="filter-btn" title="Filtrar">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="22,3 2,3 10,12.46 10,19 14,21 14,12.46"></polygon>
+          </svg>
+        </button>
+        
+        <div class="dropdown-panel" id="filter-panel">
+          <div class="panel-title">Filtrar libros</div>
+          
+          <div class="filter-group">
+            <label for="author-filter">Por autor:</label>
+            <div class="author-filter-container">
+              <input 
+                type="text" 
+                id="author-filter" 
+                placeholder="Escribe para buscar autor..."
+                autocomplete="off"
+              />
+              <div id="author-dropdown" class="author-dropdown"></div>
+            </div>
+          </div>
+          
+          <div class="filter-group">
+            <label for="year-filter">Por año de publicación:</label>
+            <select id="year-filter">
+              <option value="">Todos los años</option>
+            </select>
+          </div>
+          
+          <button class="clear-filters" id="clear-filters">
+            Limpiar filtros
+          </button>
+        </div>
+      </div>
+      
+      <!-- Información de resultados -->
+      <div class="results-info" id="results-info"></div>
+    </div>
+    
+    <!-- Overlay para cerrar paneles -->
+    <div class="overlay" id="overlay"></div>
+    
     <!-- Las tarjetas se cargarán aquí -->
+    <div id="books-container"></div>
   </main>
+  
   <div class="bottom-nav">
-  <button class="nav-btn" onclick="window.location.href='buscar.html'">
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-      <circle cx="11" cy="11" r="8"></circle>
-      <path d="21 21l-4.35-4.35"></path>
-    </svg>
-    <span>Buscar</span>
-  </button>
-  
-  <button class="nav-btn" onclick="window.location.href='afegir.html'">
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-      <line x1="12" y1="5" x2="12" y2="19"></line>
-      <line x1="5" y1="12" x2="19" y2="12"></line>
-    </svg>
-    <span>Añadir</span>
-  </button>
-  
-  <button class="nav-btn nav-btn-primary" onclick="window.location.href='llista.html'">
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-      <line x1="8" y1="6" x2="21" y2="6"></line>
-      <line x1="8" y1="12" x2="21" y2="12"></line>
-      <line x1="8" y1="18" x2="21" y2="18"></line>
-      <line x1="3" y1="6" x2="3.01" y2="6"></line>
-      <line x1="3" y1="12" x2="3.01" y2="12"></line>
-      <line x1="3" y1="18" x2="3.01" y2="18"></line>
-    </svg>
-    <span>Lista</span>
-  </button>
-</div>
+    <button class="nav-btn" onclick="window.location.href='buscar.html'">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"></circle>
+        <path d="21 21l-4.35-4.35"></path>
+      </svg>
+      <span>Buscar</span>
+    </button>
+    
+    <button class="nav-btn" onclick="window.location.href='afegir.html'">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="12" y1="5" x2="12" y2="19"></line>
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+      </svg>
+      <span>Añadir</span>
+    </button>
+    
+    <button class="nav-btn nav-btn-primary" onclick="window.location.href='llista.html'">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="8" y1="6" x2="21" y2="6"></line>
+        <line x1="8" y1="12" x2="21" y2="12"></line>
+        <line x1="8" y1="18" x2="21" y2="18"></line>
+        <line x1="3" y1="6" x2="3.01" y2="6"></line>
+        <line x1="3" y1="12" x2="3.01" y2="12"></line>
+        <line x1="3" y1="18" x2="3.01" y2="18"></line>
+      </svg>
+      <span>Lista</span>
+    </button>
+  </div>
+
+  <script>
+    // Reemplaza estos valores con los de tu proyecto Supabase
+    const SUPABASE_URL = 'https://vrbheaswtkheyxswnhrp.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZyYmhlYXN3dGtoZXl4c3duaHJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ4MjkzMDcsImV4cCI6MjA2MDQwNTMwN30.3lrx_kJwp7uHbhu9IgKGTM5Somobi4tjTiYdCtEYW1o';
+
+    if (SUPABASE_URL.includes('<TU_PROYECTO>') || SUPABASE_KEY.includes('<TU_ANON_KEY>')) {
+      console.error('❌ Sustituye SUPABASE_URL y SUPABASE_KEY por tus credenciales reales.');
+    }
+
+    // Crea el cliente
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // Variables globales
+    let allBooks = [];
+    let filteredBooks = [];
+    let allAuthors = [];
+    let currentAuthorFilter = '';
+    let currentYearFilter = '';
+    let currentSort = 'arrival';
+
+    // Elementos del DOM
+    const booksContainer = document.getElementById('books-container');
+    const sortSelect = document.getElementById('sort-select');
+    const authorFilter = document.getElementById('author-filter');
+    const authorDropdown = document.getElementById('author-dropdown');
+    const yearFilter = document.getElementById('year-filter');
+    const clearFiltersBtn = document.getElementById('clear-filters');
+    const resultsInfo = document.getElementById('results-info');
+    const sortBtn = document.getElementById('sort-btn');
+    const filterBtn = document.getElementById('filter-btn');
+    const sortPanel = document.getElementById('sort-panel');
+    const filterPanel = document.getElementById('filter-panel');
+    const overlay = document.getElementById('overlay');
+
+    // Cargar datos al inicio
+    document.addEventListener('DOMContentLoaded', async () => {
+      try {
+        const { data: books, error } = await supabaseClient
+          .from('libros')
+          .select('id, titol, isbn, autor:autores(nombre), estanteria:estanterias(nombre), fecha_publicacion')
+          .order('id', { ascending: false });
+
+        if (error) throw error;
+        
+        allBooks = books;
+        filteredBooks = [...allBooks];
+        
+        populateFilters();
+        applyFiltersAndSort();
+        setupEventListeners();
+        
+      } catch (err) {
+        console.error('Error al cargar libros:', err);
+        booksContainer.innerHTML = '<p>Error al cargar los libros. Revisa la consola.</p>';
+      }
+    });
+
+    // Poblar filtros dinámicamente
+    function populateFilters() {
+      // Extraer autores únicos
+      allAuthors = [...new Set(allBooks.map(book => book.autor.nombre))].sort();
+      
+      // Extraer años únicos
+      const years = [...new Set(allBooks
+        .map(book => book.fecha_publicacion)
+        .filter(year => year)
+      )].sort((a, b) => b - a);
+      
+      // Poblar dropdown de años
+      yearFilter.innerHTML = '<option value="">Todos los años</option>';
+      years.forEach(year => {
+        const option = document.createElement('option');
+        option.value = year;
+        option.textContent = year;
+        yearFilter.appendChild(option);
+      });
+    }
+
+    // Configurar event listeners
+    function setupEventListeners() {
+      sortSelect.addEventListener('change', handleSortChange);
+      authorFilter.addEventListener('input', handleAuthorInput);
+      authorFilter.addEventListener('focus', showAuthorDropdown);
+      authorFilter.addEventListener('blur', hideAuthorDropdown);
+      yearFilter.addEventListener('change', handleYearChange);
+      clearFiltersBtn.addEventListener('click', clearAllFilters);
+      
+      // Botones de control
+      sortBtn.addEventListener('click', toggleSortPanel);
+      filterBtn.addEventListener('click', toggleFilterPanel);
+      overlay.addEventListener('click', closeAllPanels);
+      
+      // Manejar clics en el dropdown de autores
+      authorDropdown.addEventListener('mousedown', handleAuthorSelect);
+      
+      // Cerrar paneles con ESC
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          closeAllPanels();
+        }
+      });
+      
+      // Prevenir que los paneles se cierren al hacer clic dentro de ellos
+      sortPanel.addEventListener('click', (e) => e.stopPropagation());
+      filterPanel.addEventListener('click', (e) => e.stopPropagation());
+    }
+
+    // Manejar cambio de ordenación
+    function handleSortChange() {
+      currentSort = sortSelect.value;
+      applyFiltersAndSort();
+    }
+    
+    // Alternar panel de ordenación
+    function toggleSortPanel() {
+      const isOpen = sortPanel.classList.contains('show');
+      closeAllPanels();
+      
+      if (!isOpen) {
+        sortPanel.classList.add('show');
+        sortBtn.classList.add('active');
+        overlay.classList.add('show');
+      }
+    }
+    
+    // Alternar panel de filtros
+    function toggleFilterPanel() {
+      const isOpen = filterPanel.classList.contains('show');
+      closeAllPanels();
+      
+      if (!isOpen) {
+        filterPanel.classList.add('show');
+        filterBtn.classList.add('active');
+        overlay.classList.add('show');
+      }
+    }
+    
+    // Cerrar todos los paneles
+    function closeAllPanels() {
+      sortPanel.classList.remove('show');
+      filterPanel.classList.remove('show');
+      sortBtn.classList.remove('active');
+      filterBtn.classList.remove('active');
+      overlay.classList.remove('show');
+      authorDropdown.style.display = 'none';
+    }
+
+    // Manejar input de autor
+    function handleAuthorInput() {
+      const searchTerm = authorFilter.value.toLowerCase();
+      updateAuthorDropdown(searchTerm);
+    }
+
+    // Manejar cambio de filtro de año
+    function handleYearChange() {
+      currentYearFilter = yearFilter.value;
+      applyFiltersAndSort();
+    }
+
+    // Mostrar dropdown de autores
+    function showAuthorDropdown() {
+      updateAuthorDropdown(authorFilter.value.toLowerCase());
+    }
+
+    // Ocultar dropdown de autores
+    function hideAuthorDropdown() {
+      setTimeout(() => {
+        authorDropdown.style.display = 'none';
+      }, 200);
+    }
+
+    // Actualizar dropdown de autores
+    function updateAuthorDropdown(searchTerm) {
+      const matchingAuthors = allAuthors.filter(author => 
+        author.toLowerCase().includes(searchTerm)
+      );
+      
+      if (matchingAuthors.length === 0 || (matchingAuthors.length === 1 && matchingAuthors[0].toLowerCase() === searchTerm)) {
+        authorDropdown.style.display = 'none';
+        return;
+      }
+      
+      authorDropdown.innerHTML = '';
+      matchingAuthors.forEach(author => {
+        const option = document.createElement('div');
+        option.className = 'author-option';
+        option.textContent = author;
+        option.dataset.author = author;
+        authorDropdown.appendChild(option);
+      });
+      
+      authorDropdown.style.display = 'block';
+    }
+
+    // Manejar selección de autor
+    function handleAuthorSelect(e) {
+      if (e.target.classList.contains('author-option')) {
+        const selectedAuthor = e.target.dataset.author;
+        authorFilter.value = selectedAuthor;
+        currentAuthorFilter = selectedAuthor;
+        authorDropdown.style.display = 'none';
+        applyFiltersAndSort();
+      }
+    }
+
+    // Limpiar todos los filtros
+    function clearAllFilters() {
+      authorFilter.value = '';
+      yearFilter.value = '';
+      sortSelect.value = 'arrival';
+      currentAuthorFilter = '';
+      currentYearFilter = '';
+      currentSort = 'arrival';
+      applyFiltersAndSort();
+      closeAllPanels();
+    }
+
+    // Aplicar filtros y ordenación
+    function applyFiltersAndSort() {
+      // Aplicar filtros
+      filteredBooks = allBooks.filter(book => {
+        const matchesAuthor = !currentAuthorFilter || 
+          book.autor.nombre.toLowerCase().includes(currentAuthorFilter.toLowerCase());
+        
+        const matchesYear = !currentYearFilter || 
+          book.fecha_publicacion == currentYearFilter;
+        
+        return matchesAuthor && matchesYear;
+      });
+      
+      // Aplicar ordenación
+      filteredBooks.sort((a, b) => {
+        switch (currentSort) {
+          case 'arrival':
+            return b.id - a.id; // Más reciente primero
+          case 'title-asc':
+            return a.titol.localeCompare(b.titol);
+          case 'title-desc':
+            return b.titol.localeCompare(a.titol);
+          case 'author-asc':
+            return a.autor.nombre.localeCompare(b.autor.nombre);
+          case 'author-desc':
+            return b.autor.nombre.localeCompare(a.autor.nombre);
+          case 'year-asc':
+            return (a.fecha_publicacion || 0) - (b.fecha_publicacion || 0);
+          case 'year-desc':
+            return (b.fecha_publicacion || 0) - (a.fecha_publicacion || 0);
+          default:
+            return 0;
+        }
+      });
+      
+      // Actualizar interfaz
+      updateResultsInfo();
+      renderCards();
+    }
+
+    // Actualizar información de resultados
+    function updateResultsInfo() {
+      const total = allBooks.length;
+      const filtered = filteredBooks.length;
+      
+      if (filtered === total) {
+        resultsInfo.textContent = `Mostrando ${total} libros`;
+      } else {
+        resultsInfo.textContent = `Mostrando ${filtered} de ${total} libros`;
+      }
+    }
+
+    // Renderizar tarjetas
+    function renderCards() {
+      booksContainer.innerHTML = '';
+      
+      if (filteredBooks.length === 0) {
+        booksContainer.innerHTML = '<p>No se encontraron libros con los filtros aplicados.</p>';
+        return;
+      }
+      
+      filteredBooks.forEach(book => {
+        const link = document.createElement('a');
+        link.href = `ficha.html?id=${book.id}`;
+        link.className = 'card';
+        link.innerHTML = `
+          <h2>${book.titol}</h2>
+          <p><strong>Autor:</strong> ${book.autor.nombre}</p>
+          <p><strong>ISBN:</strong> ${book.isbn || 'N/A'}</p>
+          <p><strong>Año:</strong> ${book.fecha_publicacion || 'N/A'}</p>
+          <p><strong>Estantería:</strong> ${book.estanteria?.nombre || 'Sin asignar'}</p>
+        `;
+        booksContainer.appendChild(link);
+      });
+    }
+  </script>
 </body>
 </html>

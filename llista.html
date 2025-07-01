@@ -144,17 +144,34 @@
       border-bottom: none;
     }
     
-    .clear-filters {
-      width: 100%;
-      padding: 8px 16px;
-      background: #6c757d;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 14px;
-      margin-top: 10px;
-    }
+    .apply-filters {
+  width: 100%;
+  padding: 8px 16px;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.apply-filters:hover {
+  background: #0056b3;
+}
+
+.clear-filters {
+  width: 100%;
+  padding: 8px 16px;
+  background: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-top: 0;
+}
     
     .clear-filters:hover {
       background: #5a6268;
@@ -295,7 +312,10 @@
               <option value="">Todos los años</option>
             </select>
           </div>
-          
+          <button class="apply-filters" id="apply-filters">
+            Filtrar
+          </button>
+
           <button class="clear-filters" id="clear-filters">
             Limpiar filtros
           </button>
@@ -369,6 +389,7 @@
     const authorFilter = document.getElementById('author-filter');
     const authorDropdown = document.getElementById('author-dropdown');
     const yearFilter = document.getElementById('year-filter');
+    const applyFiltersBtn = document.getElementById('apply-filters');
     const clearFiltersBtn = document.getElementById('clear-filters');
     const resultsInfo = document.getElementById('results-info');
     const sortBtn = document.getElementById('sort-btn');
@@ -428,6 +449,7 @@
       authorFilter.addEventListener('focus', showAuthorDropdown);
       authorFilter.addEventListener('blur', hideAuthorDropdown);
       yearFilter.addEventListener('change', handleYearChange);
+      applyFiltersBtn.addEventListener('click', applyFiltersAndClose);
       clearFiltersBtn.addEventListener('click', clearAllFilters);
       
       // Botones de control
@@ -546,6 +568,15 @@
         authorDropdown.style.display = 'none';
         applyFiltersAndSort();
       }
+    }
+    
+    // Aplicar filtros y cerrar modal
+    function applyFiltersAndClose() {
+      // Actualizar filtros basado en los valores actuales de los campos
+      currentAuthorFilter = authorFilter.value;
+      currentYearFilter = yearFilter.value;
+      applyFiltersAndSort();
+      closeAllPanels();
     }
 
     // Limpiar todos los filtros

@@ -622,7 +622,7 @@
           // Mensaje bajo la búsqueda
           document.querySelector('#google-message').innerHTML =
             `ISBN no hallado localmente. Datos Google Books:<br>` +
-            `<strong>${gb.titol}</strong> — ${gb.autor}`;
+            `<a href="https://www.goodreads.com/search?q=${q}" target="_blank"><strong>${gb.titol}</strong> — ${gb.autor}</a>`;
 
           // Re-búsqueda en BD por título y autor de Google
           const [tits, auts] = await Promise.all([

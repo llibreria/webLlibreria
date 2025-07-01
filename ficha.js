@@ -81,7 +81,7 @@ function setupEliminar(libroId) {
     try {
       await supabaseClient.from('prestamos').delete().eq('libro_id', libroId);
       await supabaseClient.from('libros').delete().eq('id', libroId);
-      window.location.href = '/llista.html';
+      window.location.href = './llista.html';
     } catch (err) {
       console.error('Error al eliminar:', err);
       alert('No se pudo eliminar el libro.');

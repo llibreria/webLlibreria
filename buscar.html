@@ -387,6 +387,130 @@
       outline: 2px solid var(--primary-color);
       outline-offset: 2px;
     }
+    /* Camera Scanner Styles */
+.camera-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.9);
+  z-index: 2000;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.camera-container.active {
+  display: flex;
+}
+
+.camera-header {
+  color: white;
+  text-align: center;
+  margin-bottom: 1rem;
+  padding: 1rem;
+}
+
+.camera-header h3 {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.camera-header p {
+  opacity: 0.8;
+}
+
+.camera-video {
+  width: 90%;
+  max-width: 400px;
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.camera-controls {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.camera-btn {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 25px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.camera-btn-close {
+  background: #e53e3e;
+  color: white;
+}
+
+.camera-btn-close:hover {
+  background: #c53030;
+  transform: translateY(-2px);
+}
+
+.camera-btn-toggle {
+  background: var(--primary-color);
+  color: white;
+}
+
+.camera-btn-toggle:hover {
+  background: var(--primary-dark);
+  transform: translateY(-2px);
+}
+
+.scanning-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 250px;
+  height: 150px;
+  border: 2px solid var(--accent-color);
+  border-radius: 10px;
+  pointer-events: none;
+}
+
+.scanning-line {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--accent-color);
+  animation: scanLine 2s linear infinite;
+}
+
+@keyframes scanLine {
+  0% { top: 0; }
+  100% { top: 100%; }
+}
+.camera-scan-btn {
+  padding: 1rem;
+  background: var(--secondary-color);
+  color: white;
+  border: none;
+  border-radius: 50px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  display: inline-block;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 4px 15px rgba(118, 75, 162, 0.3);
+}
+
+.camera-scan-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(118, 75, 162, 0.4);
+}
   </style>
 </head>
 <body>
@@ -400,8 +524,24 @@
       <form id="search-form">
         <input type="text" id="search-input" placeholder="ISBN, título o autor" autocomplete="off">
         <button type="submit">Buscar</button>
+        <button type="button" id="camera-btn" class="camera-scan-btn">📷 Escanear ISBN </button>
       </form>
-      
+      <div id="camera-container" class="camera-container">
+  <div class="camera-header">
+    <h3>Escanear código de barras</h3>
+    <p>Apunta la cámara hacia el código de barras del libro</p>
+  </div>
+  <div style="position: relative;">
+    <video id="camera-video" class="camera-video" autoplay playsinline></video>
+    <div class="scanning-overlay">
+      <div class="scanning-line"></div>
+    </div>
+  </div>
+  <div class="camera-controls">
+    <button id="camera-close" class="camera-btn camera-btn-close">Cerrar</button>
+    <button id="camera-toggle" class="camera-btn camera-btn-toggle">Cambiar cámara</button>
+  </div>
+</div>
       <div id="google-message"></div>
     </div>
 

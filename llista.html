@@ -252,7 +252,7 @@
 </head>
 <body>
   <header class="header">
-    <h1>Mi Biblioteca</h1>
+    <h1>Els nostres llibres</h1>
   </header>
   
   <main class="container">
@@ -267,23 +267,23 @@
         </button>
         
         <div class="dropdown-panel" id="sort-panel">
-          <div class="panel-title">Ordenar por</div>
+          <div class="panel-title">Ordenar per</div>
           <div class="filter-group">
             <select id="sort-select">
-              <option value="arrival">Orden de llegada (más reciente)</option>
-              <option value="title-asc">Título (A-Z)</option>
-              <option value="title-desc">Título (Z-A)</option>
-              <option value="author-asc">Autor (A-Z)</option>
-              <option value="author-desc">Autor (Z-A)</option>
-              <option value="year-asc">Año publicación (más antiguo)</option>
-              <option value="year-desc">Año publicación (más reciente)</option>
+              <option value="arrival">Ordre d'arribada (més recent)</option>
+              <option value="title-asc">Títol (A-Z)</option>
+              <option value="title-desc">Títol (Z-A)</option>
+              <option value="author-asc">Autor/a (A-Z)</option>
+              <option value="author-desc">Autor/a (Z-A)</option>
+              <option value="year-asc">Any (més antic)</option>
+              <option value="year-desc">Any (més recent)</option>
             </select>
           </div>
           <button class="apply-filters" id="apply-sort">
-            Aplicar ordenación
+            Aplicar ordre
           </button>
           <button class="clear-filters" id="reset-sort">
-            Restablecer orden
+            Restablir ordre
           </button>
         </div>
       </div>
@@ -297,10 +297,10 @@
         </button>
         
         <div class="dropdown-panel" id="filter-panel">
-          <div class="panel-title">Filtrar libros</div>
+          <div class="panel-title">Filtrar llibres</div>
           
           <div class="filter-group">
-            <label for="author-filter">Por autor:</label>
+            <label for="author-filter">Per autor:</label>
             <div class="author-filter-container">
               <input 
                 type="text" 
@@ -313,9 +313,9 @@
           </div>
           
           <div class="filter-group">
-            <label for="year-filter">Por año de publicación:</label>
+            <label for="year-filter">Per any de publicació:</label>
             <select id="year-filter">
-              <option value="">Todos los años</option>
+              <option value="">Tots els anys</option>
             </select>
           </div>
           <button class="apply-filters" id="apply-filters">
@@ -323,7 +323,7 @@
           </button>
 
           <button class="clear-filters" id="clear-filters">
-            Limpiar filtros
+            Netejar filtres
           </button>
         </div>
       </div>
@@ -353,7 +353,7 @@
         <line x1="12" y1="5" x2="12" y2="19"></line>
         <line x1="5" y1="12" x2="19" y2="12"></line>
       </svg>
-      <span>Añadir</span>
+      <span>Afegir</span>
     </button>
     
     <button class="nav-btn nav-btn-primary" onclick="window.location.href='llista.html'">
@@ -365,7 +365,7 @@
         <line x1="3" y1="12" x2="3.01" y2="12"></line>
         <line x1="3" y1="18" x2="3.01" y2="18"></line>
       </svg>
-      <span>Lista</span>
+      <span>Llista</span>
     </button>
   </div>
 
@@ -424,8 +424,8 @@
         setupEventListeners();
         
       } catch (err) {
-        console.error('Error al cargar libros:', err);
-        booksContainer.innerHTML = '<p>Error al cargar los libros. Revisa la consola.</p>';
+        console.error('Error al carregar llibres:', err);
+        booksContainer.innerHTML = '<p>Error al carregar llibres. Revisa la consola.</p>';
       }
     });
 
@@ -441,7 +441,7 @@
       )].sort((a, b) => b - a);
       
       // Poblar dropdown de años
-      yearFilter.innerHTML = '<option value="">Todos los años</option>';
+      yearFilter.innerHTML = '<option value="">Tots els anys</option>';
       years.forEach(year => {
         const option = document.createElement('option');
         option.value = year;
@@ -664,9 +664,9 @@
       const filtered = filteredBooks.length;
       
       if (filtered === total) {
-        resultsInfo.textContent = `Mostrando ${total} libros`;
+        resultsInfo.textContent = `${total} llibres`;
       } else {
-        resultsInfo.textContent = `Mostrando ${filtered} de ${total} libros`;
+        resultsInfo.textContent = `${filtered} de ${total} llibres`;
       }
     }
 
@@ -675,7 +675,7 @@
       booksContainer.innerHTML = '';
       
       if (filteredBooks.length === 0) {
-        booksContainer.innerHTML = '<p>No se encontraron libros con los filtros aplicados.</p>';
+        booksContainer.innerHTML = '<p>No es troben llibres amb aquests filtres.</p>';
         return;
       }
       
@@ -685,10 +685,10 @@
         link.className = 'card';
         link.innerHTML = `
           <h2>${book.titol}</h2>
-          <p><strong>Autor:</strong> ${book.autor.nombre}</p>
+          <p><strong>Autor/a:</strong> ${book.autor.nombre}</p>
           <p><strong>ISBN:</strong> ${book.isbn || 'N/A'}</p>
-          <p><strong>Año:</strong> ${book.fecha_publicacion || 'N/A'}</p>
-          <p><strong>Estantería:</strong> ${book.estanteria?.nombre || 'Sin asignar'}</p>
+          <p><strong>Any:</strong> ${book.fecha_publicacion || 'N/A'}</p>
+          <p><strong>Prestatgeria:</strong> ${book.estanteria?.nombre || 'Sense assignar'}</p>
         `;
         booksContainer.appendChild(link);
       });

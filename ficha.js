@@ -15,16 +15,16 @@ function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 function renderPrestarModalSinPrestamo() {
   const cont = document.getElementById('contenido-prestar');
   cont.innerHTML = `
-    <h2 class="texto-grande">Prestar Libro</h2>
-    <input id="input-quien" type="text" placeholder="Nombre de la persona" class="texto-grande" />
+    <h2 class="texto-grande">Deixar Llibre</h2>
+    <input id="input-quien" type="text" placeholder="Nom de la persona" class="texto-grande" />
     <div class="modal-actions">
-      <button onclick="closeModal('modal-prestar')">Cancelar</button>
+      <button onclick="closeModal('modal-prestar')">Cancel·lar</button>
       <button id="btn-prestar-confirm">Confirmar</button>
     </div>
   `;
   document.getElementById('btn-prestar-confirm').addEventListener('click', async () => {
     const quien = document.getElementById('input-quien').value.trim();
-    if (!quien) return alert('Introduce nombre.');
+    if (!quien) return alert('Introdueix el nom.');
     const libroId = new URLSearchParams(window.location.search).get('id');
     await supabaseClient.from('prestamos').insert([{ libro_id: libroId, quien, devuelto: false }]);
     location.reload();
@@ -35,12 +35,12 @@ function renderPrestarModalSinPrestamo() {
 function renderPrestarModalConPrestamo(prestamo) {
   const cont = document.getElementById('contenido-prestar');
   cont.innerHTML = `
-    <h2 class="texto-grande">Préstamo Activo</h2>
-    <p class="texto-grande"><strong>Prestado a:</strong> ${prestamo.quien}</p>
-    <p class="texto-grande"><strong>Desde:</strong> ${new Date(prestamo.cuando).toLocaleDateString()}</p>
+    <h2 class="texto-grande">En préstec</h2>
+    <p class="texto-grande"><strong>Deixat a:</strong> ${prestamo.quien}</p>
+    <p class="texto-grande"><strong>Des del:</strong> ${new Date(prestamo.cuando).toLocaleDateString()}</p>
     <div class="modal-actions">
-      <button onclick="closeModal('modal-prestar')">Cancelar</button>
-      <button id="btn-devolver">Devuelto</button>
+      <button onclick="closeModal('modal-prestar')">Cancel·lar</button>
+      <button id="btn-devolver">Retornar</button>
     </div>
   `;
   document.getElementById('btn-devolver').addEventListener('click', async () => {
@@ -52,13 +52,13 @@ function renderPrestarModalConPrestamo(prestamo) {
 // Render modal Recolocar
 async function renderRecolocarModal(currentId) {
   const selector = document.getElementById('selector-estanteria');
-  selector.innerHTML = '<option value="">Cargando...</option>';
+  selector.innerHTML = '<option value="">Carregant...</option>';
 
   const { data: estanterias, error } = await supabaseClient
     .from('estanterias')
     .select('id, nombre')
     .order('nombre', { ascending: true });
-  if (error) return console.error('Error al cargar estanterías:', error);
+  if (error) return console.error('Error en carregar prestatgeries:', error);
 
   selector.innerHTML = estanterias
     .map(e => `<option value="${e.id}" ${e.id == currentId ? 'selected' : ''}>${e.nombre}</option>`)
@@ -68,7 +68,7 @@ async function renderRecolocarModal(currentId) {
   document.getElementById('btn-recolocar-confirm').onclick = async () => {
     const libroId = new URLSearchParams(window.location.search).get('id');
     const nuevaEst = selector.value;
-    if (!nuevaEst) return alert('Selecciona una estantería.');
+    if (!nuevaEst) return alert('Selecciona una prestatgeria.');
     await supabaseClient.from('libros').update({ estanteria_id: nuevaEst }).eq('id', libroId);
     closeModal('modal-recolocar');
     location.reload();
@@ -84,7 +84,7 @@ function setupEliminar(libroId) {
       window.location.href = './llista.html';
     } catch (err) {
       console.error('Error al eliminar:', err);
-      alert('No se pudo eliminar el libro.');
+      alert('No es pot eliminar el llibre.');
     }
   });
 }
@@ -105,7 +105,7 @@ async function initFicha() {
     if (error) throw error;
     libro = data;
   } catch (err) {
-    console.error('Error al cargar libro:', err);
+    console.error('Error en carregar llibre:', err);
     return;
   }
 
@@ -113,7 +113,7 @@ async function initFicha() {
   document.getElementById('titulo-libro').textContent = libro.titol;
   document.getElementById('autor-libro').textContent = libro.autor.nombre;
   document.getElementById('isbn-libro').textContent = libro.isbn || 'N/A';
-  document.getElementById('estanteria-libro').textContent = libro.estanteria?.nombre || 'Sin asignar';
+  document.getElementById('estanteria-libro').textContent = libro.estanteria?.nombre || 'Sense assignar';
 
   // Obtener y mostrar portada mediante Google Books API
   const imgEl = document.getElementById('portada-libro');
@@ -126,9 +126,9 @@ async function initFicha() {
         if (thumb) imgEl.src = thumb;
         else imgEl.alt = 'Portada no disponible';
       })
-      .catch(() => { imgEl.alt = 'Error al cargar portada'; });
+      .catch(() => { imgEl.alt = 'Error en carregar portada'; });
   } else {
-    imgEl.alt = 'No tiene ISBN';
+    imgEl.alt = 'No té ISBN';
   }
 
   // Configurar botones visibles
@@ -148,15 +148,15 @@ async function initFicha() {
       .limit(1);
     prestamo = prestamos[0] || null;
   } catch (err) {
-    console.error('Error al cargar préstamo:', err);
+    console.error('Error en carregar:', err);
   }
 
   const infoDiv = document.getElementById('prestamo-info');
   if (prestamo) {
-    infoDiv.innerHTML = `<p class="texto-grande"><strong>Prestado a:</strong> ${prestamo.quien}</p><p class="texto-grande"><strong>Desde:</strong> ${new Date(prestamo.cuando).toLocaleDateString()}</p>`;
+    infoDiv.innerHTML = `<p class="texto-grande"><strong>Deixat a:</strong> ${prestamo.quien}</p><p class="texto-grande"><strong>Des del:</strong> ${new Date(prestamo.cuando).toLocaleDateString()}</p>`;
     renderPrestarModalConPrestamo(prestamo);
   } else {
-    infoDiv.innerHTML = '<p class="texto-grande"><em>No está prestado.</em></p>';
+    infoDiv.innerHTML = '<p class="texto-grande"><em>No està deixat.</em></p>';
     renderPrestarModalSinPrestamo();
   }
 

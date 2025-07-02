@@ -286,7 +286,7 @@
     }
     body {
   padding-bottom: 80px;
-  
+
 }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
@@ -295,19 +295,19 @@
 <body>
   <header class="header ficha-header">
     <button onclick="history.back()" class="btn-icon">🔙</button>
-    <h1 id="titulo-libro" class="titulo-grande">Cargando...</h1>
+    <h1 id="titulo-libro" class="titulo-grande">Carregant...</h1>
   </header>
 
   <main class="ficha-container">
     <div class="ficha-content">
       <div class="ficha-texto">
-        <p class="texto-grande"><strong>Autor:</strong> <span id="autor-libro"></span></p>
+        <p class="texto-grande"><strong>Autor/a:</strong> <span id="autor-libro"></span></p>
         <p class="texto-grande"><strong>ISBN:</strong> <span id="isbn-libro"></span></p>
-        <p class="texto-grande"><strong>Estantería:</strong> <span id="estanteria-libro"></span></p>
+        <p class="texto-grande"><strong>Prestatgeria:</strong> <span id="estanteria-libro"></span></p>
         <div id="prestamo-info" class="texto-grande"></div>
         <div class="accion-row">
-          <button id="btn-recolocar" class="btn-accion btn-primary">Recolocar</button>
-          <button id="btn-prestar" class="btn-accion btn-secondary">Prestar</button>
+          <button id="btn-recolocar" class="btn-accion btn-primary">Recol·locar</button>
+          <button id="btn-prestar" class="btn-accion btn-secondary">Deixar</button>
         </div>
       </div>
       <div class="ficha-imagen">
@@ -323,10 +323,10 @@
   <div id="modal-recolocar" class="modal hidden">
     <div class="modal-content">
       <button class="close-btn" onclick="closeModal('modal-recolocar')">✖</button>
-      <h2 class="texto-grande">Recolocar Libro</h2>
+      <h2 class="texto-grande">Recol·locar Llibre</h2>
       <select id="selector-estanteria"></select>
       <div class="modal-actions">
-        <button id="btn-recolocar-cancel">Cancelar</button>
+        <button id="btn-recolocar-cancel">Cancel·lar</button>
         <button id="btn-recolocar-confirm">Confirmar</button>
       </div>
     </div>
@@ -344,10 +344,10 @@
   <div id="modal-eliminar" class="modal hidden">
     <div class="modal-content">
       <button class="close-btn" onclick="closeModal('modal-eliminar')">✖</button>
-      <h2 class="texto-grande">¿Eliminar este libro?</h2>
+      <h2 class="texto-grande">¿Eliminar aquest llibre?</h2>
       <p id="info-libro-eliminar" class="texto-grande"></p>
       <div class="modal-actions">
-        <button onclick="closeModal('modal-eliminar')">Cancelar</button>
+        <button onclick="closeModal('modal-eliminar')">Cancel·lar</button>
         <button id="btn-eliminar-confirm">Confirmar</button>
       </div>
     </div>
@@ -366,7 +366,7 @@
       <line x1="12" y1="5" x2="12" y2="19"></line>
       <line x1="5" y1="12" x2="19" y2="12"></line>
     </svg>
-    <span>Añadir</span>
+    <span>Afegir</span>
   </button>
   
   <button class="nav-btn" onclick="window.location.href='llista.html'">

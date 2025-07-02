@@ -442,7 +442,7 @@
       <form id="search-form">
         <input type="text" id="search-input" placeholder="ISBN, título o autor" autocomplete="off">
         <button type="submit">Buscar</button>
-        <button type="button" class="scan-btn" id="scanBtn">📷 Escanear ISBN</button>
+        <button type="button" class="scan-btn" id="scanBtn">📷 Escanejar ISBN</button>
       </form>
       
       <div class="video-container">
@@ -454,17 +454,17 @@
 
     <div class="results-container">
       <section class="result-section">
-        <h2>Coincidencia por ISBN</h2>
+        <h2>Coincidència en ISBN</h2>
         <div id="isbn-list" class="book-list"></div>
       </section>
       
       <section class="result-section">
-        <h2>Coincidencia por Título</h2>
+        <h2>Coincidència en Títol</h2>
         <div id="titulo-list" class="book-list"></div>
       </section>
       
       <section class="result-section">
-        <h2>Coincidencia por Autor</h2>
+        <h2>Coincidència en Autor/a</h2>
         <div id="autor-list" class="book-list"></div>
       </section>
     </div>
@@ -512,7 +512,7 @@
     // Funciones del escáner ISBN
     async function toggleScan() {
       if (!('BarcodeDetector' in window)) {
-        alert('Tu navegador no soporta escaneo de códigos de barras. Prueba con Chrome en Android.');
+        alert('El teu navegador no suporta escaneig de codis de barres. Prova amb Chrome a Android.');
         return;
       }
 
@@ -537,14 +537,14 @@
         video.srcObject = stream;
         video.style.display = 'block';
         scanning = true;
-        scanBtn.textContent = 'Detener escaneo';
+        scanBtn.textContent = 'Aturar escaneig';
         
         video.addEventListener('loadedmetadata', () => {
           scanLoop();
         });
         
       } catch (error) {
-        alert('No se pudo activar la cámara. Asegúrate de dar permisos de cámara.');
+        alert('No es pot activar la càmera. Assegureu-vos de donar permisos de càmera al navegador.');
         console.error('Error accessing camera:', error);
       }
     }
@@ -556,7 +556,7 @@
         stream = null;
       }
       video.style.display = 'none';
-      scanBtn.textContent = '📷 Escanear ISBN';
+      scanBtn.textContent = '📷 Escanejar ISBN';
     }
 
     async function scanLoop() {
@@ -621,7 +621,7 @@
         if (gb) {
           // Mensaje bajo la búsqueda
           document.querySelector('#google-message').innerHTML =
-            `ISBN no hallado localmente. Datos Google Books:<br>` +
+            `ISBN no trobat localment. Dades de Google Books:<br>` +
             `<a href="https://www.goodreads.com/search?q=${q}" target="_blank"><strong>${gb.titol}</strong> — ${gb.autor}</a>`;
 
           // Re-búsqueda en BD por título y autor de Google
@@ -670,7 +670,7 @@
         id: libro.id,
         titol: libro.titol,
         isbn: libro.isbn,
-        autorNombre: libro.autores?.nombre ?? 'Desconocido'
+        autorNombre: libro.autores?.nombre ?? 'N/A'
       }));
     }
 
@@ -725,7 +725,7 @@
 
         resultados.push({
           ...libro,
-          autorNombre: errA ? 'Desconocido' : autor.nombre
+          autorNombre: errA ? 'N/A' : autor.nombre
         });
       }
       return resultados;
@@ -801,7 +801,7 @@
 
         link.innerHTML = `
           <h2>${book.titol}</h2>
-          <p><strong>Autor:</strong> ${book.autorNombre}</p>
+          <p><strong>Autor/a:</strong> ${book.autorNombre}</p>
           <p><strong>ISBN:</strong> ${book.isbn || 'N/A'}</p>
         `;
         container.appendChild(link);

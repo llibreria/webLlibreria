@@ -279,6 +279,12 @@
               <option value="year-desc">Año publicación (más reciente)</option>
             </select>
           </div>
+          <button class="apply-filters" id="apply-sort">
+            Aplicar ordenación
+          </button>
+          <button class="clear-filters" id="reset-sort">
+            Restablecer orden
+          </button>
         </div>
       </div>
       
@@ -391,6 +397,8 @@
     const yearFilter = document.getElementById('year-filter');
     const applyFiltersBtn = document.getElementById('apply-filters');
     const clearFiltersBtn = document.getElementById('clear-filters');
+    const applySortBtn = document.getElementById('apply-sort');
+    const resetSortBtn = document.getElementById('reset-sort');
     const resultsInfo = document.getElementById('results-info');
     const sortBtn = document.getElementById('sort-btn');
     const filterBtn = document.getElementById('filter-btn');
@@ -451,6 +459,8 @@
       yearFilter.addEventListener('change', handleYearChange);
       applyFiltersBtn.addEventListener('click', applyFiltersAndClose);
       clearFiltersBtn.addEventListener('click', clearAllFilters);
+      applySortBtn.addEventListener('click', applySortAndClose);
+      resetSortBtn.addEventListener('click', resetSortAndClose);
       
       // Botones de control
       sortBtn.addEventListener('click', toggleSortPanel);
@@ -474,8 +484,10 @@
 
     // Manejar cambio de ordenación
     function handleSortChange() {
-      currentSort = sortSelect.value;
-      applyFiltersAndSort();
+      // Ya no aplicamos directamente aquí, esperamos a que se use el botón
+      // Solo actualizamos la variable temporal
+      // currentSort = sortSelect.value;
+      // applyFiltersAndSort();
     }
     
     // Alternar panel de ordenación
@@ -575,6 +587,21 @@
       // Actualizar filtros basado en los valores actuales de los campos
       currentAuthorFilter = authorFilter.value;
       currentYearFilter = yearFilter.value;
+      applyFiltersAndSort();
+      closeAllPanels();
+    }
+
+    // Aplicar ordenación y cerrar modal
+    function applySortAndClose() {
+      currentSort = sortSelect.value;
+      applyFiltersAndSort();
+      closeAllPanels();
+    }
+
+    // Restablecer ordenación y cerrar modal
+    function resetSortAndClose() {
+      sortSelect.value = 'arrival';
+      currentSort = 'arrival';
       applyFiltersAndSort();
       closeAllPanels();
     }
